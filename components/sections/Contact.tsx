@@ -76,7 +76,7 @@ export default function Contact() {
             </div>
 
             <a
-              href="#"
+              href="https://www.linkedin.com/in/dnsuarez/"
               target="_blank"
               rel="noopener noreferrer"
               className="group relative inline-block font-sans font-semibold text-body2 text-off-white pb-1"
