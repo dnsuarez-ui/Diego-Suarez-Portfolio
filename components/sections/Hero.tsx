@@ -17,9 +17,11 @@ const PARALLAX_LERP = 0.08
 export default function Hero() {
   const [scope, animate] = useAnimate()
   const photoMoveRef = useRef<HTMLDivElement>(null)
+  const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+  const parallaxLerp = isTouch ? 0.05 : PARALLAX_LERP
 
   const { scrollY } = useScroll()
-  const photoScrollY = useTransform(scrollY, (v) => v * 0.25)
+  const photoScrollY = useTransform(scrollY, (v) => v * (isTouch ? 0.06 : 0.25))
 
   // Entrance sequence — runs once on load
   useEffect(() => {
@@ -70,8 +72,8 @@ export default function Hero() {
 
     const tick = () => {
       if (inside) {
-        current.x += (target.x - current.x) * PARALLAX_LERP
-        current.y += (target.y - current.y) * PARALLAX_LERP
+        current.x += (target.x - current.x) * parallaxLerp
+        current.y += (target.y - current.y) * parallaxLerp
         img.style.transition = 'none'
         img.style.transform = `translate(${current.x.toFixed(2)}px, ${current.y.toFixed(2)}px)`
       }

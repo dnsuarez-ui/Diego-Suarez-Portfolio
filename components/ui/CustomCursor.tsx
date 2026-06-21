@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 type CursorState = 'default' | 'photo' | 'interactive'
 
@@ -19,8 +19,14 @@ export default function CustomCursor() {
   const current = useRef({ x: -100, y: -100 })
   const [state, setState] = useState<CursorState>('default')
   const [clicking, setClicking] = useState(false)
+  const [isTouch, setIsTouch] = useState(false)
+
+  useLayoutEffect(() => {
+    setIsTouch(window.matchMedia('(pointer: coarse)').matches)
+  }, [])
 
   useEffect(() => {
+    if (isTouch) return
     let raf = 0
 
     const onMove = (e: MouseEvent) => {
@@ -59,7 +65,9 @@ export default function CustomCursor() {
       window.removeEventListener('mousedown', onDown)
       cancelAnimationFrame(raf)
     }
-  }, [])
+  }, [isTouch])
+
+  if (isTouch) return null
 
   const size = clicking ? CLICK_SIZE : SIZE[state]
 
