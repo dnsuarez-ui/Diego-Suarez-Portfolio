@@ -50,80 +50,82 @@ export default function About() {
   const sidebarY = useTransform(scrollYProgress, [0, 1], [0, -24])
 
   return (
-    <section id="about" ref={sectionRef} className="px-section-x py-section-y">
-      <FadeUp>
-        <SectionLabel className="mb-12">From graphic design to product strategy</SectionLabel>
-      </FadeUp>
-
-      <FadeUp delay={0.05}>
-        <h2 className="font-sans font-bold text-section-title text-off-white mb-8">
-          Every step shaped the next.
-        </h2>
-      </FadeUp>
-
-      <div className="flex flex-wrap items-stretch gap-stack-md">
-        {/* Timeline — grows to fill remaining space, like the original flex-1 */}
-        <FadeUp delay={0.1} className="min-w-0 flex-[1_1_min(100%,480px)]">
-          <div className="flex flex-col">
-            {jobs.map((job) => (
-              <div key={job.company}>
-                <div className="h-px bg-border" />
-                <div className="flex flex-col gap-2 py-6">
-                  <span className="font-sans font-normal text-body3 text-off-white">
-                    {job.period}
-                  </span>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-sans font-semibold text-body2 text-off-white">
-                      {job.company}
-                    </span>
-                    <span className="w-[2px] h-[2px] rounded-none bg-border max-md:hidden" />
-                    <span className="font-sans font-normal text-body2 text-off-white max-w-md">
-                      {job.role}
-                    </span>
-                  </div>
-                  <p className="font-sans font-normal text-body3 text-off-white">{job.desc}</p>
-                </div>
-              </div>
-            ))}
-            <div className="h-px bg-border" />
-          </div>
+    <section id="about" ref={sectionRef}>
+      <div className="max-w-[1440px] mx-auto px-section-x py-section-y">
+        <FadeUp>
+          <SectionLabel className="mb-12">From graphic design to product strategy</SectionLabel>
         </FadeUp>
 
-        {/* Sidebar — stays near its original 428px size on desktop, matching Figma */}
-        <FadeUp delay={0.15} className="min-w-0 flex-[0_1_min(100%,428px)]">
-          <motion.div
-            style={{ y: sidebarY }}
-            className="flex flex-col justify-between gap-8 border border-border bg-surface p-8"
-          >
-            <div className="flex flex-col gap-4">
-              <h3 className="font-sans font-semibold text-headline text-off-white">
-                15+ years designing for humans.
-              </h3>
-              <div className="flex flex-col gap-4">
-                {bodyParagraphs.map((p) => (
-                  <p key={p} className="font-sans font-normal text-body2 text-off-white">
-                    {p}
-                  </p>
-                ))}
-              </div>
-            </div>
+        <FadeUp delay={0.05}>
+          <h2 className="font-sans font-bold text-section-title text-off-white mb-8">
+            Every step shaped the next.
+          </h2>
+        </FadeUp>
 
-            <div className="flex flex-col gap-6">
+        <div className="flex flex-wrap items-stretch gap-stack-md">
+          {/* Timeline — grows to fill remaining space, like the original flex-1 */}
+          <FadeUp delay={0.1} className="min-w-0 flex-[1_1_min(100%,480px)]">
+            <div className="flex flex-col">
+              {jobs.map((job) => (
+                <div key={job.company}>
+                  <div className="h-px bg-border" />
+                  <div className="flex flex-col gap-2 py-6">
+                    <span className="font-sans font-normal text-body3 text-off-white">
+                      {job.period}
+                    </span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-sans font-semibold text-body2 text-off-white">
+                        {job.company}
+                      </span>
+                      <span className="w-[2px] h-[2px] rounded-none bg-border max-md:hidden" />
+                      <span className="font-sans font-normal text-body2 text-off-white max-w-md">
+                        {job.role}
+                      </span>
+                    </div>
+                    <p className="font-sans font-normal text-body3 text-off-white">{job.desc}</p>
+                  </div>
+                </div>
+              ))}
               <div className="h-px bg-border" />
-              <div className="flex flex-col gap-6">
-                <span className="font-sans font-normal text-body3 text-off-white">
-                  Also worked with:
-                </span>
-                <div className="flex flex-wrap items-center justify-between gap-6">
-                  {logos.map((logo) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={logo.src} src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} />
+            </div>
+          </FadeUp>
+
+          {/* Sidebar — stays near its original 428px size on desktop, matching Figma */}
+          <FadeUp delay={0.15} className="min-w-0 flex-[0_1_min(100%,428px)]">
+            <motion.div
+              style={{ y: sidebarY }}
+              className="flex flex-col justify-between gap-8 border border-border bg-surface p-8"
+            >
+              <div className="flex flex-col gap-4">
+                <h3 className="font-sans font-semibold text-headline text-off-white">
+                  15+ years designing for humans.
+                </h3>
+                <div className="flex flex-col gap-4">
+                  {bodyParagraphs.map((p) => (
+                    <p key={p} className="font-sans font-normal text-body2 text-off-white">
+                      {p}
+                    </p>
                   ))}
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </FadeUp>
+
+              <div className="flex flex-col gap-6">
+                <div className="h-px bg-border" />
+                <div className="flex flex-col gap-6">
+                  <span className="font-sans font-normal text-body3 text-off-white">
+                    Also worked with:
+                  </span>
+                  <div className="flex flex-wrap items-center justify-between gap-6">
+                    {logos.map((logo) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={logo.src} src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </FadeUp>
+        </div>
       </div>
     </section>
   )

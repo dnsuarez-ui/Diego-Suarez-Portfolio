@@ -93,7 +93,7 @@ export default function Hero() {
 
   return (
     <section ref={scope} className="bg-pure-black overflow-hidden">
-      <div className="flex flex-col gap-stack-xl py-section-y max-w-[1512px] mx-auto">
+      <div className="flex flex-col gap-stack-xl py-section-y max-w-[1440px] mx-auto">
         {/* Two-column layout: text keeps growing, photo stays near its original size — wraps to stacked when there's no room, no breakpoints */}
         <div className="flex flex-wrap items-center gap-stack-md">
           {/* Text column — grows to fill remaining space, like the original flex-1 */}
@@ -144,7 +144,7 @@ export default function Hero() {
           <motion.div
             className="portrait-wrap min-w-0 flex-[0_1_min(100%,523px)]"
             initial={{ opacity: 0, y: 10 }}
-            style={{ marginRight: 'calc(-1 * max(0px, (100vw - 1512px) / 2))' }}
+            style={{ marginRight: 'calc(-1 * max(0px, (100vw - 1440px) / 2))' }}
           >
             <div className="relative w-full aspect-[523/549]">
               {/* Ambient light — static, behind the photo, bleeds beyond its edges */}

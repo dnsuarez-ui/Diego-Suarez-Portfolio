@@ -38,8 +38,8 @@ body {
   outline-offset: 2px;
 }
 
-* {
-  cursor: none;
+*, *::before, *::after, a, button, input, [role="button"] {
+  cursor: none !important;
 }
 
 .grain-overlay {
