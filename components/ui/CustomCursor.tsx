@@ -4,13 +4,22 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 type CursorState = 'default' | 'photo' | 'interactive'
 
-const SIZE: Record<CursorState, number> = { default: 8, photo: 20, interactive: 8 }
-const BACKGROUND: Record<CursorState, string> = { default: 'transparent', photo: 'var(--color-accent)', interactive: 'var(--color-accent)' }
-const BORDER: Record<CursorState, string> = { default: '1px solid var(--color-off-white)', photo: 'none', interactive: 'none' }
-const TRANSITION: Record<CursorState, string> = { default: '0.15s ease', photo: '0.2s ease', interactive: '0.15s ease' }
+// interactive (a, button, [role="button"]): filled accent dot, no border
+// photo (hero photo — non-clickable): ring, transparent fill
+// default: ring, transparent fill — base state
+const SIZE_CLASSES: Record<CursorState, string> = {
+  default: 'w-2 h-2',
+  interactive: 'w-3 h-3',
+  photo: 'w-3 h-3',
+}
+const STYLE_CLASSES: Record<CursorState, string> = {
+  default: 'bg-transparent border border-off-white mix-blend-difference',
+  interactive: 'bg-accent border-0 mix-blend-normal',
+  photo: 'bg-transparent border border-off-white mix-blend-normal',
+}
+const CLICK_SIZE_CLASSES = 'w-1.5 h-1.5'
 
 const LERP = 0.18
-const CLICK_SIZE = 6
 const CLICK_DURATION = 80
 
 export default function CustomCursor() {
@@ -35,7 +44,7 @@ export default function CustomCursor() {
       const el = e.target as HTMLElement
       if (el.closest('[data-cursor="photo"]')) {
         setState('photo')
-      } else if (el.closest('a, button, [role="button"]')) {
+      } else if (el.closest('a, button, [role="button"], [data-clickable="true"]')) {
         setState('interactive')
       } else {
         setState('default')
@@ -79,28 +88,18 @@ export default function CustomCursor() {
 
   if (isTouch) return null
 
-  const size = clicking ? CLICK_SIZE : SIZE[state]
-
   return (
     <div
       ref={dotRef}
       id="custom-cursor"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        background: BACKGROUND[state],
-        border: BORDER[state],
-        opacity: visible ? 1 : 0,
-        mixBlendMode: state === 'default' ? 'difference' : 'normal',
-        pointerEvents: 'none',
-        zIndex: 9999,
-        transform: 'translate(-100px, -100px)',
-        transition: `width ${TRANSITION[state]}, height ${TRANSITION[state]}, background-color ${TRANSITION[state]}, border-color ${TRANSITION[state]}`,
-      }}
+      className={[
+        'fixed top-0 left-0 z-[9999] rounded-full pointer-events-none',
+        'transition-[width,height,background-color,border-width,border-color] duration-150 ease-[ease]',
+        clicking ? CLICK_SIZE_CLASSES : SIZE_CLASSES[state],
+        STYLE_CLASSES[state],
+        visible ? 'opacity-100' : 'opacity-0',
+      ].join(' ')}
+      style={{ transform: 'translate(-100px, -100px)' }}
     />
   )
 }

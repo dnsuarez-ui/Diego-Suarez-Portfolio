@@ -92,7 +92,7 @@ export default function Work() {
           <div className="flex flex-col gap-8">
             {caseStudies.map((cs, i) => (
               <FadeUp key={cs.number} delay={0.1 + i * 0.08}>
-                <div className="group flex flex-wrap items-start gap-4 py-6 px-2 cursor-pointer hover:bg-surface transition-colors duration-200 max-md:flex-col">
+                <div data-clickable="true" className="group flex flex-wrap items-start gap-4 py-6 px-2 cursor-pointer hover:bg-surface transition-colors duration-200 max-md:flex-col">
                   <span className="flex w-4 shrink-0 items-center justify-center font-sans font-medium text-caption uppercase text-light-gray">
                     {cs.number}
                   </span>
