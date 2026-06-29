@@ -3,25 +3,7 @@
 import { useState } from 'react'
 import SectionLabel from '@/components/ui/SectionLabel'
 import FadeUp from '@/components/ui/FadeUp'
-
-function CopyIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="9" y="9" width="13" height="13" rx="0" />
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
-  )
-}
+import Icon from '@/components/ui/Icon'
 
 export default function Contact() {
   const [copied, setCopied] = useState(false)
@@ -64,11 +46,11 @@ export default function Contact() {
                     aria-label="Copy email address"
                     className="flex items-center justify-center w-6 h-6 text-light-gray hover:text-off-white transition-colors duration-200"
                   >
-                    <CopyIcon />
+                    <Icon name="copy" className="h-3.5 w-3.5" />
                   </button>
                   <span
                     role="tooltip"
-                    className={`pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap border border-border bg-surface px-2 py-1 font-sans text-caption uppercase transition-opacity duration-200 ${
+                    className={`pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap border border-border-dark bg-surface px-2 py-1 font-sans text-caption uppercase transition-opacity duration-200 ${
                       copied
                         ? 'opacity-100 text-accent'
                         : 'opacity-0 group-hover/copy:opacity-100 text-light-gray'
@@ -85,7 +67,7 @@ export default function Contact() {
                 rel="noopener noreferrer"
                 className="group relative inline-block font-sans font-semibold text-body2 text-off-white pb-1"
               >
-                Linkedin
+                Linkedin<Icon name="arrow-up-right" className="inline h-[1em] w-[1em] align-[-0.1em]" />
                 <span className="absolute bottom-0 left-0 h-px w-0 bg-accent group-hover:w-full group-hover:transition-[width] group-hover:duration-300 group-hover:ease-out" />
               </a>
             </div>

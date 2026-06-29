@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { motion, useAnimate, useScroll, useTransform, stagger } from 'framer-motion'
+import { motion, useAnimate, useScroll, useTransform, useMotionValue, stagger } from 'framer-motion'
 import Image from 'next/image'
 import ComplexWord from '@/components/ui/ComplexWord'
+import Icon from '@/components/ui/Icon'
 
 const metadata = [
   ['Based in Argentina', 'Working remotely'],
@@ -13,6 +14,7 @@ const metadata = [
 
 const PARALLAX_MAX = 8 // px
 const PARALLAX_LERP = 0.08
+const SCROLL_PARALLAX_LERP = 0.06 // desktop scroll parallax smoothing, via RAF
 
 export default function Hero() {
   const [scope, animate] = useAnimate()
@@ -21,7 +23,25 @@ export default function Hero() {
   const parallaxLerp = isTouch ? 0.05 : PARALLAX_LERP
 
   const { scrollY } = useScroll()
-  const photoScrollY = useTransform(scrollY, (v) => v * (isTouch ? 0.06 : 0.25))
+  const mobileScrollY = useTransform(scrollY, (v) => v * 0.06)
+  const desktopScrollY = useMotionValue(0)
+  const photoScrollY = isTouch ? mobileScrollY : desktopScrollY
+
+  // Desktop scroll parallax — lerped via RAF instead of a direct transform for smoother interpolation
+  useEffect(() => {
+    if (isTouch) return
+    let raf = 0
+    let current = 0
+    const tick = () => {
+      const target = scrollY.get() * 0.25
+      current += (target - current) * SCROLL_PARALLAX_LERP
+      desktopScrollY.set(current)
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTouch])
 
   // Entrance sequence — runs once on load
   useEffect(() => {
@@ -101,7 +121,7 @@ export default function Hero() {
             {/* Top bar — wordmark, maps to "nav" in the entrance sequence */}
             <motion.div className="hero-topbar flex items-center gap-2" initial={{ opacity: 0 }}>
               <span className="font-sans font-bold text-body1 text-off-white">Diego Suarez</span>
-              <span className="font-sans font-normal text-body1 text-border">/</span>
+              <span className="font-sans font-normal text-body1 text-border-dark">/</span>
               <span className="font-sans font-normal text-body1 text-light-gray">Digital Product Design</span>
             </motion.div>
 
@@ -189,7 +209,7 @@ export default function Hero() {
             animate={{ y: [0, 5, 0] }}
             transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
           >
-            ↓
+            <Icon name="arrow-down" className="h-[1em] w-[1em]" />
           </motion.span>
         </motion.div>
       </div>

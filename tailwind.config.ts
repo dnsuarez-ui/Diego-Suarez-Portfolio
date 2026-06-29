@@ -10,10 +10,12 @@ const config: Config = {
       colors: {
         'pure-black': 'var(--color-pure-black)',
         'off-white': 'var(--color-off-white)',
+        'cs-bg': 'var(--color-off-white)',
         'light-gray': 'var(--color-light-gray)',
         accent: 'var(--color-accent)',
         surface: 'var(--color-surface)',
-        border: 'var(--color-border)',
+        'border-dark': 'var(--color-border-dark)',
+        'border-light': 'var(--color-border-light)',
         error: 'var(--color-error)',
       },
       fontFamily: {

@@ -46,7 +46,7 @@ const logos = [
 
 export default function About() {
   const sectionRef = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({ target: sectionRef })
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] })
   const sidebarY = useTransform(scrollYProgress, [0, 1], [0, -24])
 
   return (
@@ -68,7 +68,7 @@ export default function About() {
             <div className="flex flex-col">
               {jobs.map((job) => (
                 <div key={job.company}>
-                  <div className="h-px bg-border" />
+                  <div className="h-px bg-border-dark" />
                   <div className="flex flex-col gap-2 py-6">
                     <span className="font-sans font-normal text-body3 text-off-white">
                       {job.period}
@@ -77,7 +77,7 @@ export default function About() {
                       <span className="font-sans font-semibold text-body2 text-off-white">
                         {job.company}
                       </span>
-                      <span className="w-[2px] h-[2px] rounded-none bg-border max-md:hidden" />
+                      <span className="w-[2px] h-[2px] rounded-none bg-border-dark max-md:hidden" />
                       <span className="font-sans font-normal text-body2 text-off-white max-w-md">
                         {job.role}
                       </span>
@@ -86,7 +86,7 @@ export default function About() {
                   </div>
                 </div>
               ))}
-              <div className="h-px bg-border" />
+              <div className="h-px bg-border-dark" />
             </div>
           </FadeUp>
 
@@ -94,7 +94,7 @@ export default function About() {
           <FadeUp delay={0.15} className="min-w-0 flex-[0_1_min(100%,428px)]">
             <motion.div
               style={{ y: sidebarY }}
-              className="flex flex-col justify-between gap-8 border border-border bg-surface p-8"
+              className="flex flex-col justify-between gap-8 border border-border-dark bg-surface p-8"
             >
               <div className="flex flex-col gap-4">
                 <h3 className="font-sans font-semibold text-headline text-off-white">
@@ -110,7 +110,7 @@ export default function About() {
               </div>
 
               <div className="flex flex-col gap-6">
-                <div className="h-px bg-border" />
+                <div className="h-px bg-border-dark" />
                 <div className="flex flex-col gap-6">
                   <span className="font-sans font-normal text-body3 text-off-white">
                     Also worked with:

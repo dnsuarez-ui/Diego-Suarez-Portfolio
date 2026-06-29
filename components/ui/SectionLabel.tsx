@@ -9,7 +9,7 @@ export default function SectionLabel({ children, className = '' }: SectionLabelP
       <span className="font-sans font-normal text-caption uppercase text-light-gray whitespace-nowrap">
         {children}
       </span>
-      <div className="flex-1 h-px bg-border" />
+      <div className="flex-1 h-px bg-border-dark" />
     </div>
   )
 }

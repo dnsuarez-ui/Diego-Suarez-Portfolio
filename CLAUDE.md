@@ -274,3 +274,112 @@ Great products aren't just functional, they feel obvious."
 - No horizontal scroll at any viewport
 - Components: /components/ui/ and /components/sections/
 - Custom cursor: must work on all interactive elements site-wide
+
+---
+
+## CASE STUDY PAGES
+
+### Design tokens — inverted palette
+Case study pages use an inverted color scheme from the home:
+```
+--cs-bg:        #FAF9F6   off-white background
+--cs-text:      #000000   pure black, primary text
+--cs-muted:     #808080   secondary text, metadata, labels
+--cs-border:    #1A1A1A   dividers — 1px solid
+--cs-surface:   #F0EEEB   slightly darker off-white for subtle surfaces if needed
+```
+Accent color #FB6F00 applies on case study pages too — same rule, once per viewport max.
+
+### Grid
+- 12 columns
+- Margins: 32px left and right (reduced from home's 96px)
+- More space for images and content density
+
+### Layout — sticky left / scrollable right
+Two fixed columns, always visible:
+
+LEFT COLUMN (≈280px, sticky, full viewport height):
+- Project name — Instrument Sans 700, large
+- Industry / Year — Instrument Sans 400, cs-muted
+- Tags/pills — same style as home, no border-radius
+- Overview text — max 3 lines, concise problem statement
+- Tools used — Instrument Sans 400, cs-muted, with 1px top border separator
+- Email + LinkedIn at the bottom — always visible, same style as home contact
+
+RIGHT COLUMN (remaining width, scrollable):
+- All visual content: images, renders, wireframes, product screenshots
+- Figma comment-style section separators between phases
+- Content varies per case study — no fixed structure imposed
+
+Separator between columns: 1px solid cs-border (vertical line)
+No background color difference between columns — same cs-bg throughout
+
+### Overview copy — Serveo case study
+"I joined Serveo to design the MVP of an AI-powered hospitality platform from the ground up, covering product strategy, branding, UX/UI, and the design system. The challenge wasn't simply to automate menu management, but to make a complex workflow feel obvious. Restaurants could publish digital menus in minutes while customers enjoyed a simpler, more predictable experience. The MVP was intentionally scoped to validate the core experience while laying the foundation for future ordering, content optimization, and business insights. All work shown is real project work. No portfolio recreations."
+
+### Images in right column
+- Clickable — opens lightbox on click
+- Lightbox: full screen overlay, dark semi-transparent background, image centered, X to close, click outside to close, Escape key to close
+- Lightbox shows Figma comment context at top (avatar + comment text) matching the section it belongs to
+- Cursor on hover over clickable image: 12x12px filled text-accent (same as all clickable elements)
+- No gallery navigation inside lightbox — each image viewed individually
+
+### Scroll-triggered reveals in right column
+Each content block enters individually as user scrolls:
+- opacity 0→1, y 8→0, duration 0.5s, easeOut
+- useInView with once: true
+- Staggered 80ms between blocks within same section
+- Left column stays fully visible at all times — no scroll animation on it
+
+### Page transition — home → case study
+Triggered when user clicks a case study card on home:
+
+Sequence:
+1. Home fades to pure black — opacity 1→0, duration 0.4s ease
+2. Black holds — 0.2s silence
+3. Case study page background (cs-bg #FAF9F6) fades in — opacity 0→1, duration 0.3s
+4. Left column content fades up — opacity 0→1, y 12→0, duration 0.5s
+5. First image in right column fades up — opacity 0→1, y 12→0, duration 0.5s, 0.1s after left column
+6. Subsequent content reveals on scroll as described above
+
+Implement with Framer Motion AnimatePresence + Next.js App Router page transitions.
+
+### Page transition — case study → home (back button)
+Top left: "← Diego Suarez / Digital Product Design" — clicking returns to home
+Reverse transition:
+1. Case study fades to black — 0.4s
+2. Home fades in from black — 0.3s
+Scroll position on home resets to top.
+
+### Navigation on case study page
+Top left: "← Diego Suarez / Digital Product Design"
+- "←" — Instrument Sans 400, cs-muted
+- "Diego Suarez" — Instrument Sans 600, cs-text
+- "/" — cs-border color
+- "Digital Product Design" — Instrument Sans 400, cs-muted
+
+No other navigation on case study pages.
+
+### Custom cursor on case study pages
+Same cursor system as home — no changes:
+- Default: 8x8px, outline off-white... wait — on off-white background cursor needs to adapt
+- Default on case study: 8x8px, outline cs-text (#000000), transparent fill
+- Hover clickable: 12x12px, filled text-accent (#FB6F00)
+- Hover non-clickable: 12x12px, outline cs-text, transparent fill
+- Lerp factor: 0.18
+
+### Case study content — Serveo (public, case 01)
+Project: Serveo
+Industry: Hospitality Technology · Food & Beverage · SaaS
+Year: 2025
+Role: Product Designer
+Tags: PRODUCT STRATEGY / BRANDING / UX/UI DESIGN / DESIGN SYSTEM
+Tools: Figma · FigJam · Claude · Claude Code
+
+Sections in right column (in order):
+1. Hero image — Serveo brand gradient full width
+2. Branding section — Figma comment separator + brand guidelines image (clickable lightbox)
+3. Strategy & MVP Definition — Figma comment separator + feature mapping images
+4. Wireframes & Validation — Figma comment separator + wireframe images
+5. Final Product Design — Figma comment separator + product screenshots
+

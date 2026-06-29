@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Instrument_Sans } from 'next/font/google'
 import GrainOverlay from '@/components/ui/GrainOverlay'
 import CustomCursor from '@/components/ui/CustomCursor'
+import PageTransition from '@/components/providers/PageTransition'
 import './globals.css'
 
 const instrumentSans = Instrument_Sans({
@@ -21,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={instrumentSans.variable}>
       <body>
-        {children}
+        <PageTransition>{children}</PageTransition>
         <GrainOverlay />
         <CustomCursor />
       </body>
