@@ -43,6 +43,13 @@ body {
   cursor: none !important;
 }
 
+.material-symbols-sharp {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  font-size: inherit;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 .grain-overlay {
   position: fixed;
   inset: 0;
