@@ -1,7 +1,15 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react'
 
 const EXIT_DURATION_MS = 800 // 0.5s fade-to-black + 0.3s hold
 
@@ -53,4 +61,17 @@ export function useExitFade() {
   }, [registerExitHandler])
 
   return isExiting
+}
+
+export function useCaseStudyNavigation(): (e: MouseEvent<HTMLAnchorElement>, href: string) => void {
+  const { navigate } = usePageTransition()
+
+  return useCallback(
+    (e: MouseEvent<HTMLAnchorElement>, href: string): void => {
+      e.preventDefault()
+      sessionStorage.setItem('homeScrollPosition', String(window.scrollY))
+      navigate(href)
+    },
+    [navigate]
+  )
 }

@@ -1,7 +1,10 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import Tag from '@/components/ui/Tag'
 import Icon from '@/components/ui/Icon'
+import { useCaseStudyNavigation } from '@/components/providers/PageTransition'
 
 interface CaseStudyCardProps {
   number: string
@@ -20,9 +23,12 @@ export default function CaseStudyCard({
   href,
   tags,
 }: CaseStudyCardProps) {
+  const navigateToCaseStudy = useCaseStudyNavigation()
+
   return (
     <Link
       href={href}
+      onClick={(e) => navigateToCaseStudy(e, href)}
       data-clickable="true"
       className="group flex flex-wrap items-start gap-4 py-6 px-2 cursor-pointer hover:bg-surface transition-colors duration-200 max-md:flex-col"
     >

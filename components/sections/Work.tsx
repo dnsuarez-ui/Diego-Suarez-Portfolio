@@ -10,7 +10,7 @@ import FadeUp from '@/components/ui/FadeUp'
 import Icon from '@/components/ui/Icon'
 import CaseStudyCard from '@/components/ui/CaseStudyCard'
 import ProtectedWork from '@/components/ProtectedWork'
-import { usePageTransition } from '@/components/providers/PageTransition'
+import { useCaseStudyNavigation } from '@/components/providers/PageTransition'
 import { hasValidAccess } from '@/lib/protectedWorkAccess'
 
 const rentalModernizationCard = {
@@ -35,7 +35,7 @@ const caseStudies = [
 ]
 
 export default function Work() {
-  const { navigate } = usePageTransition()
+  const navigateToCaseStudy = useCaseStudyNavigation()
   const [unlocked, setUnlocked] = useState(false)
 
   useEffect(() => {
@@ -119,11 +119,7 @@ export default function Work() {
                   {cs.href !== '#' ? (
                     <Link
                       href={cs.href}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        sessionStorage.setItem('homeScrollPosition', String(window.scrollY))
-                        navigate(cs.href)
-                      }}
+                      onClick={(e) => navigateToCaseStudy(e, cs.href)}
                       data-clickable="true"
                       className={rowClassName}
                     >
