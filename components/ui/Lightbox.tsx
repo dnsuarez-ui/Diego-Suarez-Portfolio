@@ -53,6 +53,18 @@ const COMMENTS: Record<string, LightboxComment> = {
     lead: 'Final Product Design:',
     text: 'Designed the platform around Tailwind and shadcn/ui to accelerate MVP delivery without sacrificing usability or brand identity.',
   },
+  '/images/case-study/rental-modernization/rental-modernization-analysis.webp': {
+    lead: 'Research & Pain Points:',
+    text: 'Identified the most frequent customer questions and mapped them as pain points. Those insights became the foundation for a clearer information architecture across every touchpoint.',
+  },
+  '/images/case-study/rental-modernization/rental-modernization-wireframes.webp': {
+    lead: 'Wireframes & Reservation Hub:',
+    text: 'Mapped the end-to-end experience through wireframes, bringing emails, SMS, and web into a single Reservation Hub. The new structure also created space for upgrades while organizing reservation, payment, and driver information into clear, collapsible sections.',
+  },
+  '/images/case-study/rental-modernization/rental-modernization-chat-bot.webp': {
+    lead: 'AI Assistant:',
+    text: 'Replaced the traditional help center with an AI-powered assistant capable of answering questions in natural language, reducing friction before customers needed to contact support.',
+  },
 }
 
 const MAX_ZOOM = 3
