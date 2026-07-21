@@ -13,6 +13,9 @@ import {
 
 const EXIT_DURATION_MS = 800 // 0.5s fade-to-black + 0.3s hold
 
+export const EXIT_TRANSITION = { duration: 0.8, times: [0, 0.625, 1], ease: ['easeIn', 'linear'] }
+export const ENTER_TRANSITION = { duration: 0.4, ease: 'easeOut' }
+
 type ExitHandler = () => void
 
 interface PageTransitionContextValue {
@@ -33,7 +36,7 @@ export default function PageTransition({ children }: { children: React.ReactNode
   const navigate = useCallback(
     (href: string) => {
       exitHandlerRef.current?.()
-      setTimeout(() => router.push(href), EXIT_DURATION_MS)
+      setTimeout(() => router.push(href, { scroll: false }), EXIT_DURATION_MS)
     },
     [router]
   )
