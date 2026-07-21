@@ -24,6 +24,7 @@ export default function ServeoCaseStudyPage() {
       roles={roles}
       tools="Figma · FigJam · Claude · Claude Code"
       overviewParagraphs={overviewParagraphs}
+      isProtected={false}
     >
       {(openLightbox) => (
         <div className="flex flex-col gap-8 pt-[34px] md:pt-0">

@@ -41,6 +41,7 @@ export default function RentalModernizationCaseStudyPage() {
       roles={roles}
       tools="Figma · Miro"
       overviewParagraphs={overviewParagraphs}
+      isProtected
     >
       {(openLightbox) => (
         <div className="flex flex-col gap-8 pt-[34px] md:pt-0">

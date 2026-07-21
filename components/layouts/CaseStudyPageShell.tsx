@@ -13,6 +13,7 @@ import {
 import Lightbox, { type LightboxImage } from '@/components/ui/Lightbox'
 import Icon from '@/components/ui/Icon'
 import CopyIcon from '@/components/ui/CopyIcon'
+import { useProtectedCaseStudyGuard } from '@/lib/useProtectedCaseStudyGuard'
 
 const CONTACT_EMAIL = 'dnsuarez@gmail.com'
 
@@ -23,6 +24,8 @@ export interface CaseStudyPageShellProps {
   roles: string[]
   overviewParagraphs: ReactNode[]
   tools: string
+  /** Whether this case study requires a valid protectedWorkAccess grant to view. */
+  isProtected: boolean
   children: (openLightbox: (image: LightboxImage) => void) => ReactNode
 }
 
@@ -33,6 +36,7 @@ export default function CaseStudyPageShell({
   roles,
   overviewParagraphs,
   tools,
+  isProtected,
   children,
 }: CaseStudyPageShellProps) {
   const [copied, setCopied] = useState(false)
@@ -40,10 +44,15 @@ export default function CaseStudyPageShell({
   const [lightboxImage, setLightboxImage] = useState<LightboxImage | null>(null)
   const isExiting = useExitFade()
   const { navigate } = usePageTransition()
+  const allowed = useProtectedCaseStudyGuard(isProtected)
 
   useEffect(() => {
     setEntered(true)
   }, [])
+
+  if (!allowed) {
+    return null
+  }
 
   const handleCopyEmail = async () => {
     await navigator.clipboard.writeText(CONTACT_EMAIL)
