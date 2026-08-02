@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Instrument_Sans } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import GrainOverlay from '@/components/ui/GrainOverlay'
 import CustomCursor from '@/components/ui/CustomCursor'
 import PageTransition from '@/components/providers/PageTransition'
@@ -31,6 +33,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PageTransition>{children}</PageTransition>
         <GrainOverlay />
         <CustomCursor />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

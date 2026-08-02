@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, type MouseEvent, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useState, type MouseEvent, type ReactNode } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import CaseStudyLayout from '@/components/layouts/CaseStudyLayout'
@@ -45,6 +45,21 @@ export default function CaseStudyPageShell({
   const isExiting = useExitFade()
   const { navigate } = usePageTransition()
   const allowed = useProtectedCaseStudyGuard(isProtected)
+
+  useLayoutEffect(() => {
+    // { scroll: false } on router.push means the incoming page inherits the
+    // previous page's scroll position — reset it here so every case study
+    // (current and future, via this shared shell) always opens at the top.
+    // Must be the *actual content's* commit, not just this component's first
+    // mount: protected case studies render null until `allowed` flips true,
+    // so this depends on `allowed` rather than running once with `[]`.
+    // behavior must be 'instant', not 'auto' — 'auto' defers to the CSS
+    // `scroll-behavior: smooth` on <html> (globals.css) and animates the
+    // correction instead of jumping, which is the bug this effect exists to
+    // prevent. Only 'instant' bypasses that CSS property.
+    if (!allowed) return
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [allowed])
 
   useEffect(() => {
     setEntered(true)

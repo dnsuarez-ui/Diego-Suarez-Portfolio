@@ -1,385 +1,229 @@
 # Diego Suarez — Portfolio
-## Project
-Personal portfolio for Diego Suarez, Digital Product Designer with 15+ years of experience.
-Target audience: top-tier recruiters, hiring managers, and product leaders at international companies.
-Goal: communicate one idea — "I make complex products feel obvious."
-This is not a portfolio. It's a statement about a design philosophy.
 
-## Stack
+Personal portfolio for Diego Suarez, Digital Product Designer (15+ years).
+Audience: top-tier recruiters, hiring managers and product leaders at international companies.
+One idea, communicated relentlessly: **"I make complex products feel obvious."**
+
+Copy, per-page content and case study text live in `docs/CONTENT.md`.
+This file is architecture and rules only.
+
+---
+
+## 1. How we work — read this first
+
+- **Every prompt starts with:** `Do not stop or restart the dev server at any point.`
+- **Diego makes all design decisions.** Claude executes. Never invent visual design, copy, spacing or interaction behavior that wasn't specified.
+- **No code without prior approval.** Discuss and agree before implementing.
+- **Diagnose before implementing.** When something is broken, investigate and report the root cause first. Do not guess-fix.
+- **Design tokens by NAME, never hex values.** Write `accent-orange`, not `#FB6F00`.
+- **Never hand-copy shared logic.** If two places need the same behavior, extract it into one shared module that both consume. Copy-paste is how this project broke before.
+- **Scope discipline.** Every task states explicitly what must NOT be touched. Respect it. If a fix genuinely requires touching something out of scope, report why and wait.
+- **No magic-number timeouts.** Never `setTimeout(300)` to wait for layout. Observe the actual DOM/animation state.
+- **No abbreviations in prompts or handoffs.** Never `[rest unchanged...]`.
+- **TypeScript:** explicit types, no `any`.
+
+**Consistency is the highest-order principle** — visual, architectural and in code.
+A Senior Developer reviewing this codebase must find it impeccable.
+
+---
+
+## 2. Stack
+
 - Next.js 14 (App Router) + TypeScript
-- Tailwind CSS (fluid, no fixed breakpoints — use clamp() and relative units everywhere)
-- Framer Motion (all animation)
-- Google Fonts: Instrument Sans (400, 400 italic, 500, 600, 700, 700 italic)
-- Deployed on Vercel / GitHub
+- Tailwind CSS — fluid: `clamp()` and relative units, **no fixed breakpoints**
+- Framer Motion — all animation
+- Instrument Sans (400, 400 italic, 600, 700, 700 italic) via Google Fonts
+- Vercel + GitHub
 
-## Design System
+**Analytics:** `@vercel/analytics` and `@vercel/speed-insights` mount in `app/layout.tsx` after `{children}`, on every route including password-protected case studies. No `track()` calls (custom events are Vercel Pro-only). No consent banner — Vercel Web Analytics is cookieless. Both must be enabled manually in the Vercel dashboard after deploy; they record in production only, never on localhost.
 
-### Colors — strict, no exceptions
-```
---bg:       #000000   pure black
---text:     #FAF9F6   off-white, all primary text
---muted:    #808080   secondary text, metadata, labels
---border:   #1A1A1A   all dividers and borders
---surface:  #0D0D0D   elevated surfaces, NDA block
---orange:   #FB6F00   accent — ONE element per viewport maximum
---error:    #FF3B30   password input error state only
-```
-
-**Rules:**
-- #FB6F00 appears in maximum ONE element per viewport at any scroll position
-- No gradients anywhere except ambient light behind hero photo
-- No shadows
-- No border-radius on any structural element — zero, everywhere
-
-### Typography — Instrument Sans only, everywhere, no exceptions
-```
-font-family: 'Instrument Sans', sans-serif
-```
-
-**Weights:**
-- 400 — body, metadata, nav links
-- 400 italic — "complex" in tagline
-- 600 — "I make", "products", "feel" in tagline / nav wordmark
-- 700 — "obvious" in tagline (font-size 110% of tagline base)
-- 700 italic — section titles, contact headline
-
-**Scale — all fluid with clamp(), no fixed px:**
-- Tagline: clamp(36px, 6vw, 80px) — "obvious" at 110% of this
-- Section titles: clamp(32px, 4vw, 56px)
-- Contact headline: clamp(48px, 8vw, 96px)
-- Body: clamp(15px, 1.2vw, 17px), line-height 1.75
-- Nav: 14px, Instrument Sans 400
-- Labels: 11px, letter-spacing 0.12em, uppercase
-- Metadata: 13px, Instrument Sans 400
-- Tags: 11px, Instrument Sans 400
-
-### Spacing — fluid, base 8, clamp() everywhere
-```
-8 / 12 / 16 / 24 / 32 / 40 / 48 / 56 / 64 / 72 / 80
-```
-Never use fixed px for padding or margin on layout elements.
-
-### Responsive — fluid layout, no breakpoints
-- Use CSS Grid with auto-fit minmax for all two-column layouts
-- When single column: tagline first, photo second — always
-- Photo in single column: full width, maintain aspect ratio
-- All typography scales with clamp()
-- No horizontal scroll at any viewport
+**Environment:** `PROTECTED_PASSWORD` must be set in Vercel → Settings → Environment Variables. `.env.local` is gitignored and never pushed.
 
 ---
 
-## NAV
-- Fixed top
-- Left: "Diego Suarez" Instrument Sans 600 14px #FAF9F6 — " / " in #1A1A1A — "Digital Product Design" Instrument Sans 400 14px #808080
-- Right: Work / About / Contact → — Instrument Sans 400 13px #FAF9F6
-- Background: transparent → #000000 + border-bottom 1px solid #1A1A1A on scroll
-- Transition: 0.3s ease
-- Appears after hero animation completes
+## 3. Architecture invariants — non-negotiable
+
+These exist because each one was a real bug that cost real time. Do not undo them.
+
+### 3.1 `CaseStudyPageShell` — one shell, all case studies
+
+`components/layouts/CaseStudyPageShell.tsx` owns:
+- Outer `motion.div`, `entered` / `isExiting` transition wiring
+- `handleCopyEmail`, `handleBackClick`
+- Header / breadcrumb
+- Full sidebar: title, meta, roles, overview, tools, contact row
+- Lightbox state and `<Lightbox/>`
+- Scroll-to-top on mount (see 3.2)
+
+Right-column content arrives as a render-prop: `children: (openLightbox) => ReactNode`.
+
+**Case study pages are DATA-ONLY** — a `roles` array, an `overviewParagraphs` array, and image-section JSX. They must contain zero transition constants, zero helper/icon definitions, zero state wiring, zero sidebar markup.
+
+`rental-modernization` is the reference pattern. **Never hand-copy the shell into a new case study.**
+
+Shared UI in `components/ui/`: `Bold`, `CopyIcon`, `CaseImage`, `Comment`.
+Transition constants `EXIT_TRANSITION` / `ENTER_TRANSITION` / `EXIT_DURATION_MS` live in `components/providers/PageTransition.tsx`.
+
+### 3.2 Scroll — one strategy, each destination owns its position### 3.2 Scroll — one strategy, each destination owns its position
+
+`{ scroll: false }` on **every** `router.push`, both directions. Next's built-in scroll restoration is permanently disabled so it can never race the custom logic. Then each destination claims its own position:
+
+- **Forward (home → case study):** `useCaseStudyNavigation()` in `components/providers/PageTransition.tsx` saves `window.scrollY` to `sessionStorage["homeScrollPosition"]`, then navigates. Consumed identically by `Work.tsx` (Serveo row) and `CaseStudyCard.tsx` (protected cards). No component may save that key or call navigate directly.
+- **Arriving at a case study:** `CaseStudyPageShell` resets scroll to top on mount, using `behavior: 'instant'`. **`'instant'` is mandatory** — `'auto'` defers to the global `scroll-behavior: smooth` in `globals.css` and turns the reset into a ~750ms visible animation that also eats the entrance animation. The reset must run on the commit where real content mounts, not on an earlier empty commit (protected pages render `null` first while the access guard resolves).
+- **Back (breadcrumb → home):** also `{ scroll: false }`. No `router.back()`, no plain `<Link>`.
+- **Arriving home:** `app/page.tsx` restores `homeScrollPosition` using a `requestAnimationFrame` frame-count debounce — it polls `document.documentElement.scrollHeight` and only scrolls once the height has been identical for 3 consecutive frames. This survives the protected-work unlock re-render and the 300ms card height animation. **Never replace this with a millisecond delay.**
+
+**Do not "fix" scroll by removing `{ scroll: false }`.** That reintroduces the race that sent users to the hero.
+
+**Always verify scroll behavior at both a desktop width and a narrow/mobile width.** Above the `md` breakpoint the scroll container is `main` (`overflow-y-scroll`), so a broken `window.scrollTo` is invisible; below it the window scrolls and the bug appears.
+
+### 3.3 Shared `Lightbox`
+
+`components/ui/Lightbox.tsx` — one component, all case studies, no variants.
+
+- Opens **fit-to-width** with the **top of the image anchored to the top of the container**. Never vertically centered — tall images extend below the fold and are reached by panning. Nothing is ever cropped out of reach.
+- Zoom: min = fit-to-width (100%), max = 3× (300%). Mouse wheel and bottom slider stay in sync. **No double-click behavior.**
+- Pan: drag, clamped so the image can't leave view.
+- Cursor: reuse the existing custom cursor — orange clickable circle over the image, same circle scaled to ~8px while dragging. **Never** native `grab`/`grabbing`.
+- The Figma-style comment stays **fixed at the top** — never moves, scales or scrolls with the image.
+- Closes via Esc, backdrop click, and X button — all three.
+
+### 3.4 Password protection
+
+- Password lives in the **server** env var `PROTECTED_PASSWORD`. Never `NEXT_PUBLIC_`, never hardcoded in the frontend, never visible in the bundle.
+- Frontend POSTs to `/api/auth/validate-password`, receives a token on success.
+- `sessionStorage["protectedWorkAccess"]` stores `{ token, timestamp }`. TTL: 2 hours of inactivity **or** tab/window close, whichever comes first.
+- 3 failed attempts → 2-hour lockout: input disabled, persistent message.
+- Failed attempt animation: input shake + border to the `error` token.
+- Access is read **only** through `hasValidAccess()` in `lib/protectedWorkAccess.ts`. No component may read the key directly.
+
+Security intent: deters casual browsing and shared URLs. Not cryptographic — images remain copyable after auth, no watermarking.
+
+### 3.5 Protected case study access guard
+
+Protected case study pages have public URLs, so the route itself must guard — hiding the card on home is not protection.
+
+- On mount, check `hasValidAccess()`. Invalid → redirect to `/` **before** any protected content renders (no flash).
+- Protected vs public is a flag consumed by the shell, so future protected case studies inherit the guard automatically.
+- **Serveo is PUBLIC** and must never be guarded. `rental-modernization` is protected.
+- Client-side guard only. A server `middleware.ts` (cookie-based) can be layered on later without conflict — nothing would need redoing.
 
 ---
 
-## HERO
+## 4. Design system
 
-### Layout
-Two column grid, auto-fit:
-- Left (55%): tagline → metadata grid → Proof indicator
-- Right (45%): portrait photo, bleeds to right edge of viewport
+Always reference tokens by name.
 
-### Tagline
-Three lines:
-```
-I make
-complex products
-feel obvious.
-```
-- "I make" — Instrument Sans 600, #FAF9F6
-- "complex" — Instrument Sans 400 italic, #FAF9F6 (interactive — see animations)
-- "products" — Instrument Sans 600, #FAF9F6
-- "feel" — Instrument Sans 600, #FAF9F6
-- "obvious" — Instrument Sans 700, #FAF9F6, 110% font-size
-- "." — Instrument Sans 700, #FAF9F6 — static, no color animation, no special treatment
+### Colors
 
-### Photo
-- File: /public/images/diego-suarez.png
-- Right column, bleeds to absolute right edge of viewport — no margin, no padding right
-- Left edge: clean cut, no gradient, no fade, no blur
-- object-fit: cover
-- No border-radius
-- No border
-- Ambient light behind photo: div positioned behind image, size 120% of photo dimensions, background: radial-gradient(ellipse at center, rgba(251,111,0,0.28) 0%, transparent 70%), pointer-events: none
+| Token | Value | Use |
+|---|---|---|
+| `pure-black` | `#000000` | Home background |
+| `off-white` | `#FAF9F6` | Primary text on home |
+| `light-gray` | `#808080` | Secondary text, metadata, labels |
+| `accent-orange` | `#FB6F00` | Accent — **max ONE element per viewport** |
+| `surface` | `#0D0D0D` | Elevated surfaces |
+| `border-dark` | `#1A1A1A` | Borders on home |
+| `border-light` | `#DADADA` | Borders on case study pages |
+| `error` | `#FF3B30` | Input error state only |
+| `cs-bg` | `#FAF9F6` | Case study page background |
 
-### Metadata grid
-3×2 grid below tagline, Instrument Sans 400, 13px, #808080:
-```
-Based in Argentina          15+ years designing for humans     Craft-obsessed
-Working remotely            From graphic design to product strategy    Curiosity-driven
-```
+Case study pages invert the palette: `cs-bg` background with black primary text.
 
-### Proof indicator
-- Text "Proof" — Instrument Sans 400, 13px, #808080, static, no animation
-- Arrow below: custom SVG or span that animates (see animations section)
-- Centered below the left column content
+**Rules:** no gradients except the hero ambient light. No shadows. No border-radius on structural elements — zero, everywhere.
 
----
+### Typography — Instrument Sans only
 
-## ANIMATIONS — implement exactly as described, nothing more
+Weights: 400 (body, metadata, nav) · 400 italic ("complex") · 600 ("I make", "products", "feel", wordmark) · 700 ("obvious", at 110%) · 700 italic (section titles, contact headline).
 
-### 1. Hero entrance — runs once on load
-- 0.3s — "I make": opacity 0→1, y 12→0, duration 0.6s easeOut
-- 0.7s — "complex products": opacity 0→1, y 12→0, duration 0.6s easeOut
-- 1.1s — "feel obvious.": opacity 0→1, y 12→0, duration 0.6s easeOut
-- 1.5s — 400ms pause
-- 1.9s — photo fades in: opacity 0→1, y 10→0, duration 0.8s easeOut
-- 2.3s — metadata grid: opacity 0→1, staggered 80ms each, duration 0.5s
-- 2.7s — Proof indicator: opacity 0→1, duration 0.4s
-- 3.0s — nav fades in: opacity 0→1, duration 0.4s
+All sizes fluid via `clamp()` — never fixed px for type or layout spacing.
 
-### 2. "complex" hover — self-correcting typography
-- Trigger: mouseenter on "complex"
-- Plays once per hover, cooldown 2000ms
-- Over 200–300ms: individual characters change one at a time, 40–60ms between each
-- Substitutions: complx / compl3x / comp|ex / comp!ex / c0mplex / comple×
-- Always ends restoring: "complex"
-- Same italic style throughout
-- NO RGB glitch, NO shaking, NO flashing, NO movement
+### Spacing
 
-### 3. Photo — magnetic parallax on mousemove
-- On mousemove within hero: photo moves OPPOSITE to cursor direction
-- Max displacement: 6–8px on X and Y
-- Formula: offset = (cursorPosition / heroSize) * -8
-- Lerp factor: 0.08
-- On mouseleave: returns to center, transition 0.6s ease-out
-- Container: overflow hidden, photo inside moves
+Base-8 scale: 8 / 12 / 16 / 24 / 32 / 40 / 48 / 56 / 64 / 72 / 80 — expressed fluidly.
 
-### 4. Photo — scroll parallax
-- As user scrolls down, photo moves at 0.1x scroll speed (slower than page)
-- Photo appears to "stay behind" as content scrolls
-- Use Framer Motion useScroll + useTransform
-- Subtle — factor 0.1 maximum
+### Assets
 
-### 5. Proof arrow animation
-- "Proof" text: completely static
-- Arrow below: starts as normal ↓ in #FAF9F6
-- Loop animation:
-  1. Arrow extends downward: scaleY 1→2, duration 0.4s easeInOut
-  2. Color transitions: #FAF9F6 → #FB6F00, simultaneous with extension
-  3. Pause 0.3s
-  4. Returns to original: scaleY 2→1, color #FB6F00 → #FAF9F6, duration 0.4s
-  5. Pause 1.5s
-  6. Repeat
-- Use transform-origin: top center so it extends downward
+- Icons: SVG in `/public/icons/`, using `currentColor`.
+- Material Symbols Sharp for lock states only: `lock` / `lock_open_right`.
+- Images: WebP in `/public/images/`. Case study assets in `/public/images/case-study/[project-name]/`, with `-hd` variants for the lightbox.
 
-### 6. Film grain overlay
-- Fixed overlay, entire page, pointer-events: none, z-index 999
-- SVG filter: feTurbulence baseFrequency 0.65, fractalNoise, 3 octaves
-- Opacity: 0.055
-- Background: #FAF9F6 filtered
+### Custom cursor — one system, whole site
 
-### 7. Custom cursor
-- Hide system cursor: * { cursor: none; }
-- Component: <CustomCursor /> at root level
-- requestAnimationFrame lerp loop, factor 0.12
-- Initialize off-screen at (-100, -100)
+System cursor hidden. `requestAnimationFrame` lerp, factor **0.18**.
 
-States:
-- DEFAULT: 8px circle, border 1px solid #FAF9F6, transparent fill, mix-blend-mode: difference
-- HOVER PHOTO: expands to 20px, fills #FB6F00, no border, transition 0.2s
-- HOVER LINKS/BUTTONS: shrinks to 4px, fills #FAF9F6, no border, transition 0.15s
-- CLICK: compresses to 6px for 80ms then returns (mousedown/mouseup)
+- Default: 8px circle, outline, transparent fill
+- Hover clickable: 12px, filled `accent-orange`
+- Hover non-clickable: 12px, outline, transparent fill
+- Lightbox drag: clickable circle scaled to ~8px
 
-### Motion rules — non-negotiable
-- NO parallax other than photo scroll parallax
-- NO cursor trails
-- NO bounce or spring physics
-- NO additional animations beyond what's listed
-- Hover transitions: 0.2s ease
-- Nav scroll transition: 0.3s ease
+On case study pages the outline color adapts to the light background.
 
 ---
 
-## WORK SECTION
-- Label: "CRAFT-OBSESSED / CURIOSITY-DRIVEN" — eyebrow style
-- Title: "Crafted, tested, improved." — Instrument Sans 700 italic
-- Subtitle: "Products used by real people. Crafted through systems thinking, collaboration and iteration."
-- Each row: number / thumbnail / title + meta + tags / arrow ↗
-- Thumbnail: 16:9, background #0D0D0D, border 1px solid #1A1A1A
-- Case 01: [Case Study Title] / [Industry Type · Year] / UX Research × 3
-- Case 02: [Case Study Title] / [Industry Type · Year] / UX Research × 3
-- Hover states: defined later — do not invent
+## 5. Motion
 
-### NDA Wall
-- Background #0D0D0D, border 1px solid #1A1A1A, padding 40px
-- Lock icon top left
-- Label: "PROTECTED WORK"
-- Title: "Some projects deserve a different conversation."
-- Description: "Recent projects are available to potential clients and hiring teams. Access details are included in my resume, or simply get in touch."
-- Right side: password input + "Unlock" button (#FB6F00 background, #000000 text)
-- Below: "Need access? Contact me →"
-- Input: password chars display as em dash — (monospace font)
-- Input focus: border → #FB6F00
-- Input error: border → #FF3B30
-- Zero border-radius on input and button
+- **Hero entrance** (once on load): tagline lines at 0.3s / 0.7s / 1.1s, pause, photo 1.9s, metadata 2.3s (80ms stagger), Proof indicator 2.7s, nav 3.0s.
+- **"complex" hover:** self-correcting typography. Characters substitute one at a time (40–60ms apart) and always resolve back to `complex`. Cooldown 2000ms. No glitch, shake, flash or movement.
+- **Photo magnetic parallax:** factor **0.25 desktop / 0.06 mobile**. Moves opposite the cursor, returns to center on leave.
+- **Proof arrow:** extends downward and shifts to `accent-orange`, then returns. Looping. `transform-origin: top center`.
+- **Film grain:** fixed full-page overlay, `pointer-events: none`, opacity **0.055**.
+- **Page transition (home ↔ case study):** 1.2s total — 0.5s fade out, 0.3s hold on black, 0.4s fade in with the background transitioning black → off-white simultaneously.
+- **Scroll reveals (case study right column):** opacity 0→1, y 8→0, 0.5s easeOut, `useInView` once, 80ms stagger within a section. The left column never animates on scroll.
+- **Protected work unlock:** locked content fades out → container expands → unlocked content fades in → cards stagger in. Lock reverses the sequence.
+
+**Motion rules:** no cursor trails, no bounce or spring physics, no parallax beyond what's listed, no animation not specified here.
 
 ---
 
-## ABOUT SECTION
-- Label: "FROM GRAPHIC DESIGN TO PRODUCT STRATEGY" — eyebrow
-- Title: "Every step shaped the next." — Instrument Sans 700 italic
-- Left column: career timeline
-- Right column: body copy + "Also worked with:" logos
+## 6. Page structure
 
-### Career timeline
-- 2019 — Present / Making Sense · Graphic & Web Designer → Product Designer / "From marketing, websites and visual communication to enterprise products, design systems and AI experiences."
-- 2009 — 2019 / Mug, Visual Communication · Co-founder & Digital Designer / "Building brands, websites and long-term client relationships."
-- 2017 — 2019 / Perfil View · Project & Brand Experience Coordinator / "Turning ideas into real-world experiences."
-- 2008 — 2016 / FM Metro / FM Rock & Pop · Producer / Designer / "Creating experiences across radio, live events and digital media."
+### Home (`app/page.tsx`)
+Hero → Work → About → Contact → Footer.
 
-### Body copy
-"15+ years designing for humans.
+Work section order: Serveo row → `ProtectedWork` → protected case study cards (conditional) → About.
 
-I started in graphic design and web long before product design became mainstream.
+`ProtectedWork` lives **in the home page**, not on a route. A `/protected-work` route was created once by mistake and deleted — do not recreate it.
 
-That broader background taught me that craft matters, systems matter and clarity is something you build.
+It owns **only** the lock/unlock UI. Protected case study cards are **not** nested inside it; they render as siblings in the home page, conditionally, based on the sessionStorage grant. Those cards have no background and no border.
 
-Great products aren't just functional, they feel obvious."
+The "Lock Access" button is **primary** (`accent-orange` fill, same as Unlock) — it's the only action available in that state.
 
-### Logos
-"Also worked with:" + Coca-Cola, Red Bull, PEF logos
+### Case study (`app/case-study/[name]/page.tsx`)
+12-column grid. Sticky left column (4/12): title, meta, roles, overview, tools, contact anchored at the bottom. Scrollable right column (8/12): images with Figma-style comments, opened in the shared lightbox.
+
+Current case studies:
+- **Serveo** — public
+- **rental-modernization** — protected, and the reference pattern for everything new
 
 ---
 
-## CONTACT SECTION
-- Label: "BASED IN ARGENTINA / WORKING REMOTELY" — eyebrow
-- Body: "Open to building products with teams that value craft, curiosity and clarity."
-- Right side: email + copy icon / LinkedIn ↗
-- Email: dnsuarez@gmail.com — clicking copy icon copies to clipboard, shows "Copied!" tooltip for 1s
-- No mailto link, no form, no input
-- LinkedIn: opens in new tab
+## 7. Known pitfalls — do not reintroduce
+
+- **`behavior: 'auto'` in `scrollTo` is NOT instant.** It defers to the element's CSS `scroll-behavior`. Since `globals.css` sets `html { scroll-behavior: smooth }`, `'auto'` turns any corrective scroll into a ~750ms animation. **Every programmatic scroll reset must use `behavior: 'instant'`.**
+- **Verify every navigation change at BOTH a desktop width and a narrow/mobile width before calling it done.** Above the `md` breakpoint the scroll container is `main` (`overflow-y-scroll`), so a broken `window.scrollTo` is invisible. Below it, the window itself scrolls and the bug appears.
+- **Hero glow gradient math.** `radial-gradient(ellipse …)` defaults to `farthest-corner`, which puts the box edge at ≈70.7% of the gradient scale. A `transparent 70%` stop lands 0.7 points short — desktop rounds the residual alpha to zero, iOS Safari doesn't, producing a hard orange line. The glow now uses an outer clipped wrapper at the original footprint plus an inner element at 140% with the transparent stop at 50% (same physical radius, ~20 points of buffer). Never restore the near-miss values, and never rely on an engine clipping `filter: blur` correctly.
+- **Millisecond delays to wait for layout.** Always observe actual state.
+- **Removing `{ scroll: false }`** to fix a scroll bug.
+- **Copying the case study shell** into a new page instead of consuming it.
+- **Reading `protectedWorkAccess` directly** instead of via `hasValidAccess()`.
+- **Hardcoded hex values** anywhere in prompts or code.
 
 ---
 
-## FOOTER
-- Minimal, single row
-- Top border: 1px solid #1A1A1A
-- Left: "Diego Suarez" Instrument Sans 400 12px #808080
-- Right: "© 2025" 12px #1A1A1A
+## 8. Quality bar
 
----
-
-## QUALITY
-- WCAG 2.1 AA — #FAF9F6 on #000000 passes, maintain for all text
+- WCAG 2.1 AA contrast maintained throughout
 - No lorem ipsum anywhere
-- Zero border-radius on structural elements
-- #FB6F00 max once per viewport
 - No horizontal scroll at any viewport
-- Components: /components/ui/ and /components/sections/
-- Custom cursor: must work on all interactive elements site-wide
+- `accent-orange` never appears twice in one viewport
+- Zero border-radius on structural elements
+- Components live in `components/ui/`, `components/sections/`, `components/layouts/`, `components/providers/`
 
 ---
 
-## CASE STUDY PAGES
+## 9. Roadmap
 
-### Design tokens — inverted palette
-Case study pages use an inverted color scheme from the home:
-```
---cs-bg:        #FAF9F6   off-white background
---cs-text:      #000000   pure black, primary text
---cs-muted:     #808080   secondary text, metadata, labels
---cs-border:    #1A1A1A   dividers — 1px solid
---cs-surface:   #F0EEEB   slightly darker off-white for subtle surfaces if needed
-```
-Accent color #FB6F00 applies on case study pages too — same rule, once per viewport max.
+**Next:** language toggle (ENG/ESP) per case study — see `docs/CONTENT.md` for scope and data shape. Translations in progress.
 
-### Grid
-- 12 columns
-- Margins: 32px left and right (reduced from home's 96px)
-- More space for images and content density
-
-### Layout — sticky left / scrollable right
-Two fixed columns, always visible:
-
-LEFT COLUMN (≈280px, sticky, full viewport height):
-- Project name — Instrument Sans 700, large
-- Industry / Year — Instrument Sans 400, cs-muted
-- Tags/pills — same style as home, no border-radius
-- Overview text — max 3 lines, concise problem statement
-- Tools used — Instrument Sans 400, cs-muted, with 1px top border separator
-- Email + LinkedIn at the bottom — always visible, same style as home contact
-
-RIGHT COLUMN (remaining width, scrollable):
-- All visual content: images, renders, wireframes, product screenshots
-- Figma comment-style section separators between phases
-- Content varies per case study — no fixed structure imposed
-
-Separator between columns: 1px solid cs-border (vertical line)
-No background color difference between columns — same cs-bg throughout
-
-### Overview copy — Serveo case study
-"I joined Serveo to design the MVP of an AI-powered hospitality platform from the ground up, covering product strategy, branding, UX/UI, and the design system. The challenge wasn't simply to automate menu management, but to make a complex workflow feel obvious. Restaurants could publish digital menus in minutes while customers enjoyed a simpler, more predictable experience. The MVP was intentionally scoped to validate the core experience while laying the foundation for future ordering, content optimization, and business insights. All work shown is real project work. No portfolio recreations."
-
-### Images in right column
-- Clickable — opens lightbox on click
-- Lightbox: full screen overlay, dark semi-transparent background, image centered, X to close, click outside to close, Escape key to close
-- Lightbox shows Figma comment context at top (avatar + comment text) matching the section it belongs to
-- Cursor on hover over clickable image: 12x12px filled text-accent (same as all clickable elements)
-- No gallery navigation inside lightbox — each image viewed individually
-
-### Scroll-triggered reveals in right column
-Each content block enters individually as user scrolls:
-- opacity 0→1, y 8→0, duration 0.5s, easeOut
-- useInView with once: true
-- Staggered 80ms between blocks within same section
-- Left column stays fully visible at all times — no scroll animation on it
-
-### Page transition — home → case study
-Triggered when user clicks a case study card on home:
-
-Sequence:
-1. Home fades to pure black — opacity 1→0, duration 0.4s ease
-2. Black holds — 0.2s silence
-3. Case study page background (cs-bg #FAF9F6) fades in — opacity 0→1, duration 0.3s
-4. Left column content fades up — opacity 0→1, y 12→0, duration 0.5s
-5. First image in right column fades up — opacity 0→1, y 12→0, duration 0.5s, 0.1s after left column
-6. Subsequent content reveals on scroll as described above
-
-Implement with Framer Motion AnimatePresence + Next.js App Router page transitions.
-
-### Page transition — case study → home (back button)
-Top left: "← Diego Suarez / Digital Product Design" — clicking returns to home
-Reverse transition:
-1. Case study fades to black — 0.4s
-2. Home fades in from black — 0.3s
-Scroll position on home resets to top.
-
-### Navigation on case study page
-Top left: "← Diego Suarez / Digital Product Design"
-- "←" — Instrument Sans 400, cs-muted
-- "Diego Suarez" — Instrument Sans 600, cs-text
-- "/" — cs-border color
-- "Digital Product Design" — Instrument Sans 400, cs-muted
-
-No other navigation on case study pages.
-
-### Custom cursor on case study pages
-Same cursor system as home — no changes:
-- Default: 8x8px, outline off-white... wait — on off-white background cursor needs to adapt
-- Default on case study: 8x8px, outline cs-text (#000000), transparent fill
-- Hover clickable: 12x12px, filled text-accent (#FB6F00)
-- Hover non-clickable: 12x12px, outline cs-text, transparent fill
-- Lerp factor: 0.18
-
-### Case study content — Serveo (public, case 01)
-Project: Serveo
-Industry: Hospitality Technology · Food & Beverage · SaaS
-Year: 2025
-Role: Product Designer
-Tags: PRODUCT STRATEGY / BRANDING / UX/UI DESIGN / DESIGN SYSTEM
-Tools: Figma · FigJam · Claude · Claude Code
-
-Sections in right column (in order):
-1. Hero image — Serveo brand gradient full width
-2. Branding section — Figma comment separator + brand guidelines image (clickable lightbox)
-3. Strategy & MVP Definition — Figma comment separator + feature mapping images
-4. Wireframes & Validation — Figma comment separator + wireframe images
-5. Final Product Design — Figma comment separator + product screenshots
-
+**Deferred:** server-side `middleware.ts` for URL-level protection · "More work" cross-linking between case studies · Figma comment bubbles following the cursor over images · SEO and meta tags · mobile audit · performance audit · 4–6 additional protected case studies.

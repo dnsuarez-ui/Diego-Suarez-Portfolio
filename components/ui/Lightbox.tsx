@@ -67,6 +67,8 @@ const COMMENTS: Record<string, LightboxComment> = {
   },
 }
 
+// zoom is a multiplier of the fit-to-width scale, not an absolute image
+// scale: 1 = fit-to-width (the minimum), 3 = 3x fit-to-width (the maximum).
 const MAX_ZOOM = 3
 const MIN_ZOOM = 1
 const ZOOM_SPEED = 1.1
@@ -84,6 +86,7 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
   const [isDraggingSlider, setIsDraggingSlider] = useState(false)
 
   const imageContainerRef = useRef<HTMLDivElement>(null)
+  const imageWrapperRef = useRef<HTMLDivElement>(null)
   const sliderTrackRef = useRef<HTMLDivElement>(null)
   const lastTouchDistanceRef = useRef(0)
   const initialZoomRef = useRef(1)
@@ -140,20 +143,42 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
     setPanY(0)
   }
 
+  // The wrapper is always rendered at exactly fit-to-width (see the `w-full`
+  // class below), scaled from its top-center via transformOrigin. So its
+  // un-transformed offsetWidth/offsetHeight (transforms don't affect these)
+  // is the fit-to-width box — measuring it directly, rather than assuming it
+  // matches the container, keeps this correct for every aspect ratio.
   const clampPan = (x: number, y: number, currentZoom: number): { x: number; y: number } => {
-    if (!imageContainerRef.current) return { x, y }
+    if (!imageContainerRef.current || !imageWrapperRef.current) return { x, y }
 
-    const container = imageContainerRef.current
-    const containerWidth = container.offsetWidth
-    const containerHeight = container.offsetHeight
+    const containerWidth = imageContainerRef.current.offsetWidth
+    const containerHeight = imageContainerRef.current.offsetHeight
+    const scaledWidth = imageWrapperRef.current.offsetWidth * currentZoom
+    const scaledHeight = imageWrapperRef.current.offsetHeight * currentZoom
 
-    const maxPanX = ((currentZoom - 1) * containerWidth) / 2
-    const maxPanY = ((currentZoom - 1) * containerHeight) / 2
+    // Horizontal: scales from center, so it can overflow evenly on both sides.
+    const maxPanX = Math.max(0, (scaledWidth - containerWidth) / 2)
+    // Vertical: scales from the top edge, which never moves — the box can
+    // only grow downward, so panning only ever reveals content below,
+    // never above (that would break the top-anchor at rest).
+    const maxPanYDown = Math.max(0, scaledHeight - containerHeight)
 
     return {
       x: Math.max(-maxPanX, Math.min(maxPanX, x)),
-      y: Math.max(-maxPanY, Math.min(maxPanY, y)),
+      y: Math.max(-maxPanYDown, Math.min(0, y)),
     }
+  }
+
+  // Whether the image currently overflows the board in either direction —
+  // true even at the minimum (fit-to-width) zoom for a tall image, since
+  // that's exactly the case that needs to be pannable to reach its bottom.
+  const canPan = (): boolean => {
+    if (!imageContainerRef.current || !imageWrapperRef.current) return false
+    const containerWidth = imageContainerRef.current.offsetWidth
+    const containerHeight = imageContainerRef.current.offsetHeight
+    const scaledWidth = imageWrapperRef.current.offsetWidth * zoom
+    const scaledHeight = imageWrapperRef.current.offsetHeight * zoom
+    return scaledWidth > containerWidth + 1 || scaledHeight > containerHeight + 1
   }
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -161,17 +186,22 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
     e.preventDefault()
 
     const direction = e.deltaY > 0 ? 1 / ZOOM_SPEED : ZOOM_SPEED
-    setZoom((prev) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prev * direction)))
+    setZoom((prev) => {
+      const next = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prev * direction))
+      const clamped = clampPan(panX, panY, next)
+      setPanX(clamped.x)
+      setPanY(clamped.y)
+      return next
+    })
   }
 
   const setZoomFromRatio = (ratio: number) => {
     const clampedRatio = Math.max(0, Math.min(1, ratio))
     const newZoom = MIN_ZOOM + clampedRatio * (MAX_ZOOM - MIN_ZOOM)
     setZoom(newZoom)
-    if (newZoom <= MIN_ZOOM) {
-      setPanX(0)
-      setPanY(0)
-    }
+    const clamped = clampPan(panX, panY, newZoom)
+    setPanX(clamped.x)
+    setPanY(clamped.y)
   }
 
   const updateZoomFromPointer = (clientX: number) => {
@@ -199,7 +229,7 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
   }
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (zoom <= 1) return
+    if (!canPan()) return
     setIsDragging(true)
     setDragStart({ x: e.clientX - panX, y: e.clientY - panY })
   }
@@ -215,10 +245,6 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
 
   const handleMouseUp = () => {
     setIsDragging(false)
-  }
-
-  const handleDoubleClick = () => {
-    resetZoom()
   }
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -251,8 +277,11 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
           Math.min(MAX_ZOOM, initialZoomRef.current * ratio)
         )
         setZoom(newZoom)
+        const clamped = clampPan(panX, panY, newZoom)
+        setPanX(clamped.x)
+        setPanY(clamped.y)
       }
-    } else if (e.touches.length === 1 && zoom > 1) {
+    } else if (e.touches.length === 1 && canPan()) {
       const touch = e.touches[0]
       const newPanX = initialPanRef.current.x + (touch.clientX - e.touches[0].clientX)
       const newPanY = initialPanRef.current.y + (touch.clientY - e.touches[0].clientY)
@@ -267,7 +296,6 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
   }
 
   const comment = image ? COMMENTS[image.src] : undefined
-  const cursorStyle = zoom > 1 && isDragging ? 'grabbing' : zoom > 1 ? 'grab' : 'auto'
 
   return (
     <AnimatePresence>
@@ -317,19 +345,22 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
 
             <div
               ref={imageContainerRef}
-              className="relative flex items-center justify-center overflow-hidden bg-cs-bg max-h-[calc(90vh-200px)]"
-              style={{ cursor: cursorStyle, touchAction: 'none' }}
+              data-clickable="true"
+              className="relative flex items-start justify-center overflow-hidden bg-cs-bg max-h-[calc(90vh-200px)]"
+              style={{ touchAction: 'none' }}
               onWheel={handleWheel}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
-              onDoubleClick={handleDoubleClick}
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
               <motion.div
+                ref={imageWrapperRef}
+                className="w-full"
+                style={{ transformOrigin: '50% 0%' }}
                 animate={{
                   scale: zoom,
                   x: panX,
