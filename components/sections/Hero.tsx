@@ -167,19 +167,37 @@ export default function Hero() {
             style={{ marginRight: 'calc(-1 * max(0px, (100vw - 1440px) / 2))' }}
           >
             <div className="relative w-full aspect-[523/549]">
-              {/* Ambient light — static, behind the photo, bleeds beyond its edges */}
+              {/* Ambient light — static, behind the photo, bleeds beyond its edges.
+                  Hard-clipped to the intended 120% footprint: a plain radial-gradient's
+                  "transparent" stop reaches true zero alpha at 1/√2 (~70.7%) of a box's
+                  farthest-corner radius, so the old "transparent 70%" stop left the box's
+                  own edge a hair short of fully transparent — WebKit/mobile rounds that
+                  differently than desktop and shows it as a hard ring. The inner gradient
+                  is oversized (fades out well before its own edge) and clipped by the
+                  outer box, so nothing ever paints past the original visible area. */}
               <div
-                className="absolute pointer-events-none"
+                className="absolute overflow-hidden pointer-events-none"
                 style={{
                   width: '120%',
                   height: '120%',
                   left: '50%',
                   top: '50%',
                   transform: 'translate(-50%, -50%)',
-                  opacity: 0.28,
-                  background: 'radial-gradient(ellipse at center, var(--color-accent) 0%, transparent 70%)',
                 }}
-              />
+              >
+                <div
+                  className="absolute"
+                  style={{
+                    width: '140%',
+                    height: '140%',
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    opacity: 0.28,
+                    background: 'radial-gradient(ellipse at center, var(--color-accent) 0%, transparent 50%)',
+                  }}
+                />
+              </div>
 
               {/* Photo container — stays fixed; only the image inside moves (parallax) */}
               <motion.div
