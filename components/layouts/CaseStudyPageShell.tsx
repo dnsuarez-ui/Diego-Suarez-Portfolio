@@ -12,7 +12,6 @@ import {
 } from '@/components/providers/PageTransition'
 import Lightbox, { type LightboxImage } from '@/components/ui/Lightbox'
 import Icon from '@/components/ui/Icon'
-import CopyIcon from '@/components/ui/CopyIcon'
 import { useProtectedCaseStudyGuard } from '@/lib/useProtectedCaseStudyGuard'
 
 const CONTACT_EMAIL = 'dnsuarez@gmail.com'
@@ -154,7 +153,7 @@ export default function CaseStudyPageShell({
                   className="group relative inline-block font-sans font-semibold text-body2 text-pure-black pb-1"
                 >
                   {CONTACT_EMAIL}
-                  <span className="absolute bottom-0 left-0 h-px w-0 bg-accent group-hover:w-full group-hover:transition-[width] group-hover:duration-300 group-hover:ease-out" />
+                  <span className="absolute bottom-0 left-0 h-px w-0 bg-accent-orange group-hover:w-full group-hover:transition-[width] group-hover:duration-300 group-hover:ease-out" />
                 </a>
 
                 <div className="group/copy relative">
@@ -164,12 +163,12 @@ export default function CaseStudyPageShell({
                     aria-label="Copy email address"
                     className="flex h-6 w-6 items-center justify-center text-light-gray transition-colors duration-200 hover:text-pure-black"
                   >
-                    <CopyIcon />
+                    <Icon name="copy" className="h-3.5 w-3.5" />
                   </button>
                   <span
                     role="tooltip"
                     className={`pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap border border-border-light bg-cs-bg px-2 py-1 font-sans text-caption uppercase transition-opacity duration-200 ${
-                      copied ? 'opacity-100 text-accent' : 'opacity-0 group-hover/copy:opacity-100 text-light-gray'
+                      copied ? 'opacity-100 text-accent-orange' : 'opacity-0 group-hover/copy:opacity-100 text-light-gray'
                     }`}
                   >
                     {copied ? 'Copied!' : 'Copy email'}
@@ -185,7 +184,7 @@ export default function CaseStudyPageShell({
               >
                 <span className="relative inline-block pb-1">
                   Linkedin
-                  <span className="absolute bottom-0 left-0 h-px w-0 bg-accent group-hover:w-full group-hover:transition-[width] group-hover:duration-300 group-hover:ease-out" />
+                  <span className="absolute bottom-0 left-0 h-px w-0 bg-accent-orange group-hover:w-full group-hover:transition-[width] group-hover:duration-300 group-hover:ease-out" />
                 </span>
                 <span>
                   <Icon name="arrow-up-right" className="h-[1em] w-[1em]" />

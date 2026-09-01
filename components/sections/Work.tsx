@@ -12,27 +12,10 @@ import CaseStudyCard from '@/components/ui/CaseStudyCard'
 import ProtectedWork from '@/components/ProtectedWork'
 import { useCaseStudyNavigation } from '@/components/providers/PageTransition'
 import { hasValidAccess } from '@/lib/protectedWorkAccess'
+import { caseStudies as allCaseStudies } from '@/lib/caseStudies'
 
-const rentalModernizationCard = {
-  number: '02',
-  title: 'A money-leaking problem',
-  subtitle: 'Travel · Car Rental · B2C · 2025',
-  thumbnail: '/images/case-study/rental-modernization/rental-modernization-thumb.webp',
-  href: '/case-study/rental-modernization',
-  tags: ['UX/UI Design', 'Information Architecture', 'Communication Strategy'],
-}
-
-const caseStudies = [
-  {
-    number: '01',
-    title: 'Serveo',
-    industry: 'Hospitality Technology · Food & Beverage · SaaS',
-    year: '2025',
-    tags: ['Product Strategy', 'Branding', 'UX/UI Design'],
-    href: '/case-study/serveo',
-    thumbnail: '/images/case-study/serveo/serveo-thumb.webp',
-  },
-]
+const publicCaseStudies = allCaseStudies.filter((cs) => !cs.isProtected)
+const protectedCaseStudies = allCaseStudies.filter((cs) => cs.isProtected)
 
 export default function Work() {
   const navigateToCaseStudy = useCaseStudyNavigation()
@@ -67,7 +50,8 @@ export default function Work() {
           </div>
 
           <div className="flex flex-col gap-8">
-            {caseStudies.map((cs, i) => {
+            {publicCaseStudies.map((cs, i) => {
+              const href = `/case-study/${cs.slug}`
               const rowClassName =
                 'group flex flex-wrap items-start gap-4 py-6 px-2 cursor-pointer hover:bg-surface transition-colors duration-200 max-md:flex-col'
 
@@ -104,32 +88,26 @@ export default function Work() {
                     </div>
 
                     <div className="flex flex-wrap items-center justify-end gap-3 ml-auto max-md:justify-start max-md:ml-0">
-                      {cs.tags.map(tag => <Tag key={tag}>{tag}</Tag>)}
+                      {cs.roles.map(role => <Tag key={role}>{role}</Tag>)}
                     </div>
                   </div>
 
-                  <span className="flex items-center justify-center w-8 h-8 shrink-0 font-sans text-headline text-off-white group-hover:text-accent transition-colors duration-200 max-md:hidden">
+                  <span className="flex items-center justify-center w-8 h-8 shrink-0 font-sans text-headline text-off-white group-hover:text-accent-orange transition-colors duration-200 max-md:hidden">
                     <Icon name="arrow-up-right" className="h-[1em] w-[1em]" />
                   </span>
                 </>
               )
 
               return (
-                <FadeUp key={cs.number} delay={0.1 + i * 0.08}>
-                  {cs.href !== '#' ? (
-                    <Link
-                      href={cs.href}
-                      onClick={(e) => navigateToCaseStudy(e, cs.href)}
-                      data-clickable="true"
-                      className={rowClassName}
-                    >
-                      {rowContent}
-                    </Link>
-                  ) : (
-                    <div data-clickable="true" className={rowClassName}>
-                      {rowContent}
-                    </div>
-                  )}
+                <FadeUp key={cs.slug} delay={0.1 + i * 0.08}>
+                  <Link
+                    href={href}
+                    onClick={(e) => navigateToCaseStudy(e, href)}
+                    data-clickable="true"
+                    className={rowClassName}
+                  >
+                    {rowContent}
+                  </Link>
                 </FadeUp>
               )
             })}
@@ -151,16 +129,26 @@ export default function Work() {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3, ease: 'easeInOut' }}
-                  className="overflow-hidden"
+                  className="overflow-hidden flex flex-col gap-8"
                 >
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}
-                  >
-                    <CaseStudyCard {...rentalModernizationCard} />
-                  </motion.div>
+                  {protectedCaseStudies.map((cs, i) => (
+                    <motion.div
+                      key={cs.slug}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 + i * 0.08 }}
+                    >
+                      <CaseStudyCard
+                        number={cs.number}
+                        title={cs.title}
+                        subtitle={`${cs.industry} · ${cs.year}`}
+                        thumbnail={cs.thumbnail}
+                        href={`/case-study/${cs.slug}`}
+                        tags={cs.roles}
+                      />
+                    </motion.div>
+                  ))}
                 </motion.div>
               )}
             </AnimatePresence>

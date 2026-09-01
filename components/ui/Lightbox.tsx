@@ -4,12 +4,19 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { useEffect, useState, useRef } from 'react'
 import Icon from '@/components/ui/Icon'
+import Comment from '@/components/ui/Comment'
+
+export interface LightboxComment {
+  lead?: string
+  text: string
+}
 
 export interface LightboxImage {
   src: string
   alt: string
   width: number
   height: number
+  comment?: LightboxComment
 }
 
 interface LightboxProps {
@@ -17,55 +24,7 @@ interface LightboxProps {
   onClose: () => void
 }
 
-interface LightboxComment {
-  lead: string
-  text: string
-}
-
 const OVERLAY_BG = 'color-mix(in srgb, var(--color-pure-black) 95%, transparent)'
-
-const COMMENTS: Record<string, LightboxComment> = {
-  '/images/case-study/serveo/serveo-brand-guidelines.webp': {
-    lead: 'Branding:',
-    text: 'Built a flexible identity designed to grow with the product. The brand was created alongside the platform so design and development could evolve together.',
-  },
-  '/images/case-study/serveo/serveo-roadmap.webp': {
-    lead: 'Strategy & MVP:',
-    text: 'Mapped the product vision, explored the business model, and prioritized the smallest set of features needed to validate the idea.',
-  },
-  '/images/case-study/serveo/serveo-flow.webp': {
-    lead: 'Wireframes & Validation:',
-    text: 'Used low-fidelity wireframes to explore workflows, validate assumptions, and align stakeholders around the product vision before investing in visual design and development.',
-  },
-  '/images/case-study/serveo/serveo-wireframes.webp': {
-    lead: 'Wireframes & Validation:',
-    text: 'Used low-fidelity wireframes to explore workflows, validate assumptions, and align stakeholders around the product vision before investing in visual design and development.',
-  },
-  '/images/case-study/serveo/serveo-login.webp': {
-    lead: 'Final Product Design:',
-    text: 'Designed the platform around Tailwind and shadcn/ui to accelerate MVP delivery without sacrificing usability or brand identity.',
-  },
-  '/images/case-study/serveo/serveo-dashboard.webp': {
-    lead: 'Final Product Design:',
-    text: 'Designed the platform around Tailwind and shadcn/ui to accelerate MVP delivery without sacrificing usability or brand identity.',
-  },
-  '/images/case-study/serveo/serveo-preview.webp': {
-    lead: 'Final Product Design:',
-    text: 'Designed the platform around Tailwind and shadcn/ui to accelerate MVP delivery without sacrificing usability or brand identity.',
-  },
-  '/images/case-study/rental-modernization/rental-modernization-analysis.webp': {
-    lead: 'Research & Pain Points:',
-    text: 'Identified the most frequent customer questions and mapped them as pain points. Those insights became the foundation for a clearer information architecture across every touchpoint.',
-  },
-  '/images/case-study/rental-modernization/rental-modernization-wireframes.webp': {
-    lead: 'Wireframes & Reservation Hub:',
-    text: 'Mapped the end-to-end experience through wireframes, bringing emails, SMS, and web into a single Reservation Hub. The new structure also created space for upgrades while organizing reservation, payment, and driver information into clear, collapsible sections.',
-  },
-  '/images/case-study/rental-modernization/rental-modernization-chat-bot.webp': {
-    lead: 'AI Assistant:',
-    text: 'Replaced the traditional help center with an AI-powered assistant capable of answering questions in natural language, reducing friction before customers needed to contact support.',
-  },
-}
 
 // zoom is a multiplier of the fit-to-width scale, not an absolute image
 // scale: 1 = fit-to-width (the minimum), 3 = 3x fit-to-width (the maximum).
@@ -83,6 +42,7 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [isMobile, setIsMobile] = useState(false)
   const [isHDLoaded, setIsHDLoaded] = useState(false)
+  const [hdDimensions, setHdDimensions] = useState<{ width: number; height: number } | null>(null)
   const [isDraggingSlider, setIsDraggingSlider] = useState(false)
 
   const imageContainerRef = useRef<HTMLDivElement>(null)
@@ -104,13 +64,21 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
   useEffect(() => {
     if (!image) {
       setIsHDLoaded(false)
+      setHdDimensions(null)
       return
     }
 
     setIsHDLoaded(false)
+    setHdDimensions(null)
     const hdImage = new window.Image()
     hdImage.src = getHDImageSrc(image.src)
-    hdImage.onload = () => setIsHDLoaded(true)
+    hdImage.onload = () => {
+      // next/image sizes its optimizer request off these dimensions, not off
+      // the actual source file — passing the small image's width/height here
+      // would cap the hd asset back down to roughly the same resolution.
+      setHdDimensions({ width: hdImage.naturalWidth, height: hdImage.naturalHeight })
+      setIsHDLoaded(true)
+    }
 
     return () => {
       hdImage.onload = null
@@ -295,7 +263,7 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
     lastTouchDistanceRef.current = 0
   }
 
-  const comment = image ? COMMENTS[image.src] : undefined
+  const comment = image?.comment
 
   return (
     <AnimatePresence>
@@ -317,21 +285,7 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
           >
             <div className="flex items-start gap-4">
               <div className="min-w-0 flex-1">
-                {comment && (
-                  <div className="inline-flex max-w-full items-center gap-3 rounded-[24px_24px_24px_0px] border border-border-light bg-cs-bg p-4 shadow-md">
-                    <Image
-                      src="/images/profile-picture.webp"
-                      alt="Diego Suarez"
-                      width={96}
-                      height={96}
-                      className="h-12 w-12 shrink-0 rounded-full object-cover"
-                    />
-                    <p className="font-sans text-body3 text-pure-black">
-                      <span className="font-semibold">{comment.lead} </span>
-                      {comment.text}
-                    </p>
-                  </div>
-                )}
+                {comment && <Comment lead={comment.lead}>{comment.text}</Comment>}
               </div>
               <button
                 type="button"
@@ -376,8 +330,8 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
                 <Image
                   src={isHDLoaded ? getHDImageSrc(image.src) : image.src}
                   alt={image.alt}
-                  width={image.width}
-                  height={image.height}
+                  width={isHDLoaded && hdDimensions ? hdDimensions.width : image.width}
+                  height={isHDLoaded && hdDimensions ? hdDimensions.height : image.height}
                   className="h-auto w-full select-none"
                   draggable={false}
                 />
@@ -396,7 +350,7 @@ export default function Lightbox({ image, onClose }: LightboxProps) {
               >
                 <div className="h-[2px] w-full bg-border-light" />
                 <motion.div
-                  className="pointer-events-none absolute top-1/2 h-2 w-2 -translate-y-1/2 -translate-x-1/2 rounded-full bg-accent"
+                  className="pointer-events-none absolute top-1/2 h-2 w-2 -translate-y-1/2 -translate-x-1/2 rounded-full bg-accent-orange"
                   animate={{ left: `${((zoom - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM)) * 100}%` }}
                   transition={{ type: 'spring', stiffness: 100, damping: 20 }}
                 />
