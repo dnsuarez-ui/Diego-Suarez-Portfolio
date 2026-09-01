@@ -12,7 +12,7 @@ const config: Config = {
         'off-white': 'var(--color-off-white)',
         'cs-bg': 'var(--color-off-white)',
         'light-gray': 'var(--color-light-gray)',
-        accent: 'var(--color-accent)',
+        'accent-orange': 'var(--color-accent-orange)',
         surface: 'var(--color-surface)',
         'border-dark': 'var(--color-border-dark)',
         'border-light': 'var(--color-border-light)',

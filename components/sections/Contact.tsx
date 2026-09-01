@@ -36,7 +36,7 @@ export default function Contact() {
                   className="group relative inline-block font-sans font-semibold text-body2 text-off-white pb-1"
                 >
                   dnsuarez@gmail.com
-                  <span className="absolute bottom-0 left-0 h-px w-0 bg-accent group-hover:w-full group-hover:transition-[width] group-hover:duration-300 group-hover:ease-out" />
+                  <span className="absolute bottom-0 left-0 h-px w-0 bg-accent-orange group-hover:w-full group-hover:transition-[width] group-hover:duration-300 group-hover:ease-out" />
                 </a>
 
                 <div className="group/copy relative">
@@ -52,7 +52,7 @@ export default function Contact() {
                     role="tooltip"
                     className={`pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap border border-border-dark bg-surface px-2 py-1 font-sans text-caption uppercase transition-opacity duration-200 ${
                       copied
-                        ? 'opacity-100 text-accent'
+                        ? 'opacity-100 text-accent-orange'
                         : 'opacity-0 group-hover/copy:opacity-100 text-light-gray'
                     }`}
                   >
@@ -68,7 +68,7 @@ export default function Contact() {
                 className="group relative inline-block font-sans font-semibold text-body2 text-off-white pb-1"
               >
                 Linkedin<Icon name="arrow-up-right" className="inline h-[1em] w-[1em] align-[-0.1em]" />
-                <span className="absolute bottom-0 left-0 h-px w-0 bg-accent group-hover:w-full group-hover:transition-[width] group-hover:duration-300 group-hover:ease-out" />
+                <span className="absolute bottom-0 left-0 h-px w-0 bg-accent-orange group-hover:w-full group-hover:transition-[width] group-hover:duration-300 group-hover:ease-out" />
               </a>
             </div>
           </FadeUp>

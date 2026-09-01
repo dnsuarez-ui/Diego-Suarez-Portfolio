@@ -128,14 +128,14 @@ export default function Hero() {
             {/* Tagline */}
             <div className="font-sans text-hero-tagline">
               <motion.div className="line-1" initial={{ opacity: 0, y: 12 }}>
-                <span className="font-semibold text-off-white">I make</span>
+                <span className="font-bold text-off-white">I make</span>
               </motion.div>
               <motion.div className="line-2" initial={{ opacity: 0, y: 12 }}>
                 <ComplexWord />{' '}
-                <span className="font-semibold text-off-white">products</span>
+                <span className="font-bold text-off-white">products</span>
               </motion.div>
               <motion.div className="line-3" initial={{ opacity: 0, y: 12 }}>
-                <span className="font-semibold text-off-white">feel </span>
+                <span className="font-bold text-off-white">feel </span>
                 <span className="font-bold text-off-white text-hero-tagline-lg">
                   obvious
                 </span>
@@ -194,7 +194,7 @@ export default function Hero() {
                     top: '50%',
                     transform: 'translate(-50%, -50%)',
                     opacity: 0.28,
-                    background: 'radial-gradient(ellipse at center, var(--color-accent) 0%, transparent 50%)',
+                    background: 'radial-gradient(ellipse at center, var(--color-accent-orange) 0%, transparent 50%)',
                   }}
                 />
               </div>
@@ -223,7 +223,7 @@ export default function Hero() {
         <motion.div className="scroll-ind flex flex-col items-center gap-1" initial={{ opacity: 0 }}>
           <span className="font-sans font-medium text-body2 text-light-gray">Proof</span>
           <motion.span
-            className="font-sans font-normal text-body3 text-accent inline-block"
+            className="font-sans font-normal text-body3 text-accent-orange inline-block"
             animate={{ y: [0, 5, 0] }}
             transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
           >

@@ -55,7 +55,7 @@ export default function ComplexWord() {
 
   return (
     <span
-      className="font-semibold cursor-default select-none"
+      className="font-bold cursor-default select-none"
       onMouseEnter={handleMouseEnter}
       aria-label="complex"
     >

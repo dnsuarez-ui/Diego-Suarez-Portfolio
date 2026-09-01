@@ -32,7 +32,7 @@ A Senior Developer reviewing this codebase must find it impeccable.
 - Next.js 14 (App Router) + TypeScript
 - Tailwind CSS — fluid: `clamp()` and relative units, **no fixed breakpoints**
 - Framer Motion — all animation
-- Instrument Sans (400, 400 italic, 600, 700, 700 italic) via Google Fonts
+- Instrument Sans (400, 500, 600, 700 — normal style only, no italic) via Google Fonts
 - Vercel + GitHub
 
 **Analytics:** `@vercel/analytics` and `@vercel/speed-insights` mount in `app/layout.tsx` after `{children}`, on every route including password-protected case studies. No `track()` calls (custom events are Vercel Pro-only). No consent banner — Vercel Web Analytics is cookieless. Both must be enabled manually in the Vercel dashboard after deploy; they record in production only, never on localhost.
@@ -61,7 +61,14 @@ Right-column content arrives as a render-prop: `children: (openLightbox) => Reac
 
 `rental-modernization` is the reference pattern. **Never hand-copy the shell into a new case study.**
 
-Shared UI in `components/ui/`: `Bold`, `CopyIcon`, `CaseImage`, `Comment`.
+Shared UI in `components/ui/`: `Bold`, `CaseImage`, `Comment`, `FadeUp`. Icons (including the copy-email glyph) always go through the shared `Icon` component (`components/ui/Icon.tsx`) — never a one-off bespoke SVG component.
+
+Right-column scroll reveals in every case study use `FadeUp` (`components/ui/FadeUp.tsx`) — never a hand-rolled `motion.div`. Each comment/image is its own `<FadeUp>`; within one visual section (a comment + its image(s)), stagger children by `delay={0.08 * index}`, resetting to 0 at the start of each new section. This is standardized across Serveo, `rental-modernization` and `rental-modernization-2` — apply it identically to every future case study.
+
+**Spacing rhythm inside the right column is two-tier, always:** a comment and the image(s) it directly precedes are wrapped in their own `<div className="flex flex-col gap-4">` (16px, tight pairing); the outer column stacking those groups uses `gap-8` (32px, section separation). Never flatten a section into a single `gap-8` list — a comment must always read as visually attached to its own image, not evenly spaced from everything around it.
+
+Case study **metadata that appears in two places — title, industry, year, roles, thumbnail — lives in exactly one place: `lib/caseStudies.ts`**. Both `Work.tsx` (home cards) and each case study's own `page.tsx` import from it via `getCaseStudy(slug)`; neither retypes these fields locally. This existed as two independently hand-typed copies before and drifted out of sync twice — do not reintroduce a second copy for a new case study's card or page.
+
 Transition constants `EXIT_TRANSITION` / `ENTER_TRANSITION` / `EXIT_DURATION_MS` live in `components/providers/PageTransition.tsx`.
 
 ### 3.2 Scroll — one strategy, each destination owns its position### 3.2 Scroll — one strategy, each destination owns its position
@@ -87,6 +94,7 @@ Transition constants `EXIT_TRANSITION` / `ENTER_TRANSITION` / `EXIT_DURATION_MS`
 - Cursor: reuse the existing custom cursor — orange clickable circle over the image, same circle scaled to ~8px while dragging. **Never** native `grab`/`grabbing`.
 - The Figma-style comment stays **fixed at the top** — never moves, scales or scrolls with the image.
 - Closes via Esc, backdrop click, and X button — all three.
+- The comment shown in the lightbox is **data passed through `CaseImage`'s optional `comment` prop** (`{ lead?, text }`, typed as `LightboxComment` in `Lightbox.tsx`), sourced from the same page-local constant used to render the visible on-page `<Comment>`. Never re-type the comment text a second time keyed by image path — that was a real bug (case studies silently missing their lightbox comment because a separate lookup table went stale).
 
 ### 3.4 Password protection
 
@@ -134,7 +142,7 @@ Case study pages invert the palette: `cs-bg` background with black primary text.
 
 ### Typography — Instrument Sans only
 
-Weights: 400 (body, metadata, nav) · 400 italic ("complex") · 600 ("I make", "products", "feel", wordmark) · 700 ("obvious", at 110%) · 700 italic (section titles, contact headline).
+Weights: 400 (body, metadata, nav) · 500 (row numbers, "Proof" label) · 600 (inline emphasis via `Bold`, comment leads, card sub-headings, email/LinkedIn links) · 700 ("I make products feel" — H2-Bold — and "complex"; "obvious" at 110% — H1-Bold; wordmark; section titles). No italic is currently used anywhere on the site — only the `normal` style is loaded from `next/font`.
 
 All sizes fluid via `clamp()` — never fixed px for type or layout spacing.
 
@@ -169,7 +177,7 @@ On case study pages the outline color adapts to the light background.
 - **Proof arrow:** extends downward and shifts to `accent-orange`, then returns. Looping. `transform-origin: top center`.
 - **Film grain:** fixed full-page overlay, `pointer-events: none`, opacity **0.055**.
 - **Page transition (home ↔ case study):** 1.2s total — 0.5s fade out, 0.3s hold on black, 0.4s fade in with the background transitioning black → off-white simultaneously.
-- **Scroll reveals (case study right column):** opacity 0→1, y 8→0, 0.5s easeOut, `useInView` once, 80ms stagger within a section. The left column never animates on scroll.
+- **Scroll reveals (case study right column):** opacity 0→1, y 8→0, 0.5s easeOut, `useInView` once, 80ms stagger within a section — implemented via the shared `FadeUp` component (see 3.1), never a one-off `motion.div`. The left column never animates on scroll.
 - **Protected work unlock:** locked content fades out → container expands → unlocked content fades in → cards stagger in. Lock reverses the sequence.
 
 **Motion rules:** no cursor trails, no bounce or spring physics, no parallax beyond what's listed, no animation not specified here.
@@ -195,6 +203,7 @@ The "Lock Access" button is **primary** (`accent-orange` fill, same as Unlock) �
 Current case studies:
 - **Serveo** — public
 - **rental-modernization** — protected, and the reference pattern for everything new
+- **rental-modernization-2** — protected, second chapter of the same car-rental project ("Making every step easier")
 
 ---
 

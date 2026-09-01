@@ -102,7 +102,7 @@ export default function ProtectedWork({ unlocked, onUnlock, onLock }: ProtectedW
                   type="button"
                   onClick={handleLock}
                   data-clickable="true"
-                  className="shrink-0 h-[clamp(36px,4vw,41px)] w-full max-w-[241px] bg-accent text-off-white font-sans font-normal text-body3 px-4 hover:opacity-90 transition-opacity duration-200"
+                  className="shrink-0 h-[clamp(36px,4vw,41px)] w-full max-w-[241px] bg-accent-orange text-pure-black font-sans font-normal text-body3 px-4 hover:opacity-90 transition-opacity duration-200"
                 >
                   Lock Access
                 </button>
@@ -154,14 +154,14 @@ export default function ProtectedWork({ unlocked, onUnlock, onLock }: ProtectedW
                     animate={shake ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
                     transition={{ duration: 0.3 }}
                     className={`flex-1 min-w-0 h-[clamp(36px,4vw,41px)] bg-surface border text-off-white font-sans font-normal text-body3 px-3 placeholder:text-light-gray focus:outline-none transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      errorMessage ? 'border-error' : 'border-light-gray focus:border-accent'
+                      errorMessage ? 'border-error' : 'border-light-gray focus:border-accent-orange'
                     }`}
                   />
                   <button
                     type="submit"
                     disabled={isLockedOut || isLoading}
                     data-clickable="true"
-                    className="shrink-0 h-[clamp(36px,4vw,41px)] bg-accent text-pure-black font-sans font-normal text-body3 px-4 hover:opacity-90 transition-opacity duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="shrink-0 h-[clamp(36px,4vw,41px)] bg-accent-orange text-pure-black font-sans font-normal text-body3 px-4 hover:opacity-90 transition-opacity duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Unlock
                   </button>
@@ -177,7 +177,7 @@ export default function ProtectedWork({ unlocked, onUnlock, onLock }: ProtectedW
                   <span>Need access?</span>
                   <a
                     href="#contact"
-                    className="border-b border-border-dark hover:border-accent transition-colors duration-200"
+                    className="border-b border-border-dark hover:border-accent-orange transition-colors duration-200"
                   >
                     Contact me.
                   </a>

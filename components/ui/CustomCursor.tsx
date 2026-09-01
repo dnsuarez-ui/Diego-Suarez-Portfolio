@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 type CursorState = 'default' | 'photo' | 'interactive'
 
-// interactive (a, button, [role="button"]): filled accent dot, no border
+// interactive (a, button, [role="button"]): filled accent-orange dot, no border
 // photo (hero photo — non-clickable): ring, transparent fill
 // default: ring, transparent fill — base state
 const SIZE_CLASSES: Record<CursorState, string> = {
@@ -14,7 +14,7 @@ const SIZE_CLASSES: Record<CursorState, string> = {
 }
 const STYLE_CLASSES: Record<CursorState, string> = {
   default: 'bg-transparent border border-off-white mix-blend-difference',
-  interactive: 'bg-accent border-0 mix-blend-normal',
+  interactive: 'bg-accent-orange border-0 mix-blend-normal',
   photo: 'bg-transparent border border-off-white mix-blend-normal',
 }
 const CLICK_SIZE_CLASSES = 'w-1.5 h-1.5'

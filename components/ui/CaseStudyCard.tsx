@@ -57,7 +57,7 @@ export default function CaseStudyCard({
         </div>
       </div>
 
-      <span className="flex items-center justify-center w-8 h-8 shrink-0 font-sans text-headline text-off-white group-hover:text-accent transition-colors duration-200 max-md:hidden">
+      <span className="flex items-center justify-center w-8 h-8 shrink-0 font-sans text-headline text-off-white group-hover:text-accent-orange transition-colors duration-200 max-md:hidden">
         <Icon name="arrow-up-right" className="h-[1em] w-[1em]" />
       </span>
     </Link>
