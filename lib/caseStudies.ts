@@ -16,7 +16,7 @@ export const caseStudies: CaseStudySummary[] = [
   {
     slug: 'serveo',
     number: '01',
-    title: 'Serveo',
+    title: 'From idea to AI-powered MVP',
     industry: 'Hospitality Technology · Food & Beverage · SaaS',
     year: '2025',
     roles: ['Product Strategy', 'Branding', 'UX/UI Design', 'Design System'],
