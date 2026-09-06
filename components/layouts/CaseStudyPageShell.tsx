@@ -9,6 +9,7 @@ import {
   usePageTransition,
   EXIT_TRANSITION,
   ENTER_TRANSITION,
+  CASE_STUDY_EXIT_TRANSITION,
 } from '@/components/providers/PageTransition'
 import Lightbox, { type LightboxImage } from '@/components/ui/Lightbox'
 import Icon from '@/components/ui/Icon'
@@ -42,7 +43,7 @@ export default function CaseStudyPageShell({
   const [entered, setEntered] = useState(false)
   const [lightboxImage, setLightboxImage] = useState<LightboxImage | null>(null)
   const isExiting = useExitFade()
-  const { navigate } = usePageTransition()
+  const { navigate, exitVariant } = usePageTransition()
   const allowed = useProtectedCaseStudyGuard(isProtected)
 
   useLayoutEffect(() => {
@@ -83,7 +84,13 @@ export default function CaseStudyPageShell({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: isExiting ? [1, 0, 0] : entered ? 1 : 0 }}
-      transition={isExiting ? EXIT_TRANSITION : ENTER_TRANSITION}
+      transition={
+        isExiting
+          ? exitVariant === 'case-study'
+            ? CASE_STUDY_EXIT_TRANSITION
+            : EXIT_TRANSITION
+          : ENTER_TRANSITION
+      }
       className={`md:h-screen md:overflow-hidden transition-colors duration-[400ms] ease-out ${
         entered ? 'bg-cs-bg' : 'bg-pure-black'
       }`}

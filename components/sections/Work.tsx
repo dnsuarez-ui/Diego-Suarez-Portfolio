@@ -1,16 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import SectionLabel from '@/components/ui/SectionLabel'
-import Tag from '@/components/ui/Tag'
 import FadeUp from '@/components/ui/FadeUp'
-import Icon from '@/components/ui/Icon'
 import CaseStudyCard from '@/components/ui/CaseStudyCard'
 import ProtectedWork from '@/components/ProtectedWork'
-import { useCaseStudyNavigation } from '@/components/providers/PageTransition'
 import { hasValidAccess } from '@/lib/protectedWorkAccess'
 import { caseStudies as allCaseStudies } from '@/lib/caseStudies'
 
@@ -18,7 +13,6 @@ const publicCaseStudies = allCaseStudies.filter((cs) => !cs.isProtected)
 const protectedCaseStudies = allCaseStudies.filter((cs) => cs.isProtected)
 
 export default function Work() {
-  const navigateToCaseStudy = useCaseStudyNavigation()
   const [unlocked, setUnlocked] = useState(false)
 
   useEffect(() => {
@@ -50,67 +44,18 @@ export default function Work() {
           </div>
 
           <div className="flex flex-col gap-8">
-            {publicCaseStudies.map((cs, i) => {
-              const href = `/case-study/${cs.slug}`
-              const rowClassName =
-                'group flex flex-wrap items-start gap-4 py-6 px-2 cursor-pointer hover:bg-surface transition-colors duration-200 max-md:flex-col'
-
-              const rowContent = (
-                <>
-                  <span className="flex w-4 shrink-0 items-center justify-center font-sans font-medium text-caption uppercase text-light-gray">
-                    {cs.number}
-                  </span>
-
-                  <div className="flex flex-wrap items-center gap-stack-md flex-1 min-w-0">
-                    <div className="relative aspect-video bg-surface border border-border-dark flex-[0_1_min(100%,203px)] max-md:flex-[1_1_100%] flex items-center justify-center text-light-gray overflow-hidden">
-                      <Image
-                        src={cs.thumbnail}
-                        alt={cs.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 203px"
-                        className="object-cover"
-                      />
-                    </div>
-
-                    <div className="flex flex-col justify-center gap-4 min-w-0 flex-[1_1_min(100%,200px)]">
-                      <h3 className="font-sans font-bold text-body1 text-off-white">
-                        {cs.title}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <span className="font-sans font-normal text-body2 text-light-gray">
-                          {cs.industry}
-                        </span>
-                        <span className="w-1 h-1 rounded-none bg-light-gray" />
-                        <span className="font-sans font-normal text-body2 text-light-gray">
-                          {cs.year}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center justify-end gap-3 ml-auto max-md:justify-start max-md:ml-0">
-                      {cs.roles.map(role => <Tag key={role}>{role}</Tag>)}
-                    </div>
-                  </div>
-
-                  <span className="flex items-center justify-center w-8 h-8 shrink-0 font-sans text-headline text-off-white group-hover:text-accent-orange transition-colors duration-200 max-md:hidden">
-                    <Icon name="arrow-up-right" className="h-[1em] w-[1em]" />
-                  </span>
-                </>
-              )
-
-              return (
-                <FadeUp key={cs.slug} delay={0.1 + i * 0.08}>
-                  <Link
-                    href={href}
-                    onClick={(e) => navigateToCaseStudy(e, href)}
-                    data-clickable="true"
-                    className={rowClassName}
-                  >
-                    {rowContent}
-                  </Link>
-                </FadeUp>
-              )
-            })}
+            {publicCaseStudies.map((cs, i) => (
+              <FadeUp key={cs.slug} delay={0.1 + i * 0.08}>
+                <CaseStudyCard
+                  number={cs.number}
+                  title={cs.title}
+                  subtitle={`${cs.industry} · ${cs.year}`}
+                  thumbnail={cs.thumbnail}
+                  href={`/case-study/${cs.slug}`}
+                  tags={cs.roles}
+                />
+              </FadeUp>
+            ))}
 
             {/* NDA block */}
             <FadeUp delay={0.2}>

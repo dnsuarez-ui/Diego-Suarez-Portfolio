@@ -6,6 +6,7 @@ import CaseImage from '@/components/ui/CaseImage'
 import Comment from '@/components/ui/Comment'
 import Bold from '@/components/ui/Bold'
 import FadeUp from '@/components/ui/FadeUp'
+import MoreWork from '@/components/sections/MoreWork'
 import type { LightboxComment } from '@/components/ui/Lightbox'
 import { getCaseStudy } from '@/lib/caseStudies'
 
@@ -161,6 +162,10 @@ export default function RentalModernization2CaseStudyPage() {
               </FadeUp>
             </div>
           </div>
+
+          <FadeUp>
+            <MoreWork currentSlug="rental-modernization-2" />
+          </FadeUp>
         </div>
       )}
     </CaseStudyPageShell>

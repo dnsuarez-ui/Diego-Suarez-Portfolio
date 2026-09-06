@@ -5,6 +5,7 @@ import CaseStudyPageShell from '@/components/layouts/CaseStudyPageShell'
 import CaseImage from '@/components/ui/CaseImage'
 import Comment from '@/components/ui/Comment'
 import FadeUp from '@/components/ui/FadeUp'
+import MoreWork from '@/components/sections/MoreWork'
 import type { LightboxComment } from '@/components/ui/Lightbox'
 import { getCaseStudy } from '@/lib/caseStudies'
 
@@ -162,6 +163,10 @@ export default function ServeoCaseStudyPage() {
               height={921}
               onOpen={openLightbox}
             />
+          </FadeUp>
+
+          <FadeUp>
+            <MoreWork currentSlug="serveo" />
           </FadeUp>
         </div>
       )}
