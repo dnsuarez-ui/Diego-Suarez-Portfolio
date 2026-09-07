@@ -19,13 +19,10 @@ const STYLE_CLASSES: Record<CursorState, string> = {
 }
 const CLICK_SIZE_CLASSES = 'w-1.5 h-1.5'
 
-const LERP = 0.18
 const CLICK_DURATION = 80
 
 export default function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null)
-  const target = useRef({ x: -100, y: -100 })
-  const current = useRef({ x: -100, y: -100 })
   const [state, setState] = useState<CursorState>('default')
   const [clicking, setClicking] = useState(false)
   const [isTouch, setIsTouch] = useState(false)
@@ -37,10 +34,12 @@ export default function CustomCursor() {
 
   useEffect(() => {
     if (isTouch) return
-    let raf = 0
 
     const onMove = (e: MouseEvent) => {
-      target.current = { x: e.clientX, y: e.clientY }
+      if (dotRef.current) {
+        dotRef.current.style.transform =
+          `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`
+      }
       const el = e.target as HTMLElement
       if (el.closest('[data-cursor="photo"]')) {
         setState('photo')
@@ -61,28 +60,16 @@ export default function CustomCursor() {
     }
     const onWindowMouseOver = () => setVisible(true)
 
-    const tick = () => {
-      current.current.x += (target.current.x - current.current.x) * LERP
-      current.current.y += (target.current.y - current.current.y) * LERP
-      if (dotRef.current) {
-        dotRef.current.style.transform =
-          `translate(${current.current.x.toFixed(2)}px, ${current.current.y.toFixed(2)}px) translate(-50%, -50%)`
-      }
-      raf = requestAnimationFrame(tick)
-    }
-
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mousedown', onDown)
     window.addEventListener('mouseout', onWindowMouseOut)
     window.addEventListener('mouseover', onWindowMouseOver)
-    raf = requestAnimationFrame(tick)
 
     return () => {
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mousedown', onDown)
       window.removeEventListener('mouseout', onWindowMouseOut)
       window.removeEventListener('mouseover', onWindowMouseOver)
-      cancelAnimationFrame(raf)
     }
   }, [isTouch])
 
